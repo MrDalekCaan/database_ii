@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>旺仔的光影小店 光影 时光</title>
+		<link type="text/css" rel="stylesheet" href="css/style1.css">
+		<link rel="stylesheet"  href="css/manage.css">
+
+	</head>
+	<body background="img/background5.jpg"background-size="100%">
+
+		<div id='app'>
+			<div class="top"><!--top是页面顶部一栏-->
+			<div align="center"><a href="[[ loginpg ]]"><font face="方正舒体" size="5" color="aliceblue">[[ username ]]</a></div>
+			</div>
+			
+			
+			<div>
+				<div id="aspace1">
+					<div class="headpic">
+						<img src="img/headpic.jpg">
+					</div>
+					
+					<div class="jieshao">
+						<p><font size="3">十年老店</font></p>
+						<p><font size="3">皇冠品质</font></p>
+					</div>
+					
+					<div class="daogou" id="daogou1">
+						<ul class="daogoulist">
+							<li>页面向导</li>
+
+							<template v-for='(title, x) in titles'>
+								<li>
+									<span style="color: aliceblue">{{ title.cat }}</span>
+									<ul>
+										<li v-for='(t, y) in title.titles' 
+										:id="'title-' + x + '-' + y" 
+										:class="{ selectedcat: x == selected[0] && y == selected[1] }"
+										@click="chosecat">
+											<span>{{ t }}</span>
+										</li>
+									</ul>
+								</li>
+							</template>
+
+							
+						</ul>
+					</div>
+				</div>
+
+				<div id="aspace2" class="container" >
+					<table>
+						<tr>
+							<th width="16%">book id</th>
+							<th width="21%">book name</th>
+							<th width="21%">author</th>
+							<th width="21%">price</th>
+							<th width="21%">image url</th>
+						</tr>
+						<tr v-for="(book, i) in books" :id="book.id" :index="i">
+							<td><input :value="book.id"></input></td>
+							<td><input :value="book.bookname"></input></td>
+							<td><input :value="book.author"></input></td>
+							<td><input :value="book.price"></input></td>
+							<td><input :value="book.imgurl"></input></td>
+							<td><button @click="change">change</button></td>
+							<td><button @click="del">delete</button></td>						
+						</tr>	
+					</table>
+				</div>
+			
+
+			</div>	
+			
+			<div class="bottom"><!--页面底部-->
+				<p align="center"><font color="aliceblue" size="3">版权所有 1346981567@qq.com</font></p>
+				<button>上一页</button>
+				<span>{{ pagecount }}</span>
+				<button>下一页</button>
+			</div>
+		</div>
+
+		<!-- <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script> -->
+		<script src="js/vue.js"></script>
+		<script src="/js/manage.js"></script>
+
+	</body>
+</html>

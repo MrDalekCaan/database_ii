@@ -1,0 +1,12 @@
+#aspace2{
+	width: 62.5%;
+	height: 43.75rem;
+	background-color: rgba(0,0,0,0.7);
+	float: right;
+	margin-top: -43.75rem;
+	margin-right: 10rem;
+	display: grid;
+	grid-template-columns: auto auto auto;
+	overflow: visible;
+	overflow-y: visible;
+}
