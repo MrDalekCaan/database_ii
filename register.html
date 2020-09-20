@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en" style="height: 100%">
+<head>
+	<meta charset="UTF-8">
+	<title></title>
+	<style>
+		*{
+			margin: 0px;
+		}
+		.panel_container{
+			position: fixed;
+			height: 100%;
+			width: 100%;
+			background-color:
+			rgba(0,0,0,0.6);
+			top: 0;
+			left: 0;
+			display: flex;
+			justify-content: center;
+			align-items: center;
+		}
+		.info_panel{
+			width: 40%;
+			height: 40%;
+			background-color: yellow;
+		}
+	</style>
+</head>
+<body style="height: 100%">
+	<div id="root" style="height: 100%">
+
+		<div v-if="showError" class="panel_container">
+			<div class="info_panel">
+				<span>{{ errorMsg }}</span>
+				<button @click="closePanel">close</button>
+			</div>
+		</div>
+		
+		<form>
+			<label for="username">username</label>
+			<input type="text" name="username" v-model="username"><br>
+
+			<label for="password">请输入密码</label>
+			<input type="password" name="password" v-model="password"><br>
+
+			<label for="password_again">请再次输入密码</label>
+			<input type="password" name="password_again" v-model="password_again"><br>
+		</form>
+		<button @click="submit"></button>
+	</div>
+	<script src="./js/vue.js"></script>
+	<script src="./js/register.js"></script>
+</body>
+</html>
