@@ -1,24 +1,19 @@
-username = document.getElementById("username")
+user_id = document.getElementById("user_id")
 password = document.getElementById("password")
 
 
 function submit() {
-
-	var xhttp = new XMLHttpRequest()
+	const xhttp = new XMLHttpRequest()
 	xhttp.open('POST', 'login',false)
-	xhttp.send(`username=${username.value}&password=${password.value}`)
-	if (xhttp.responseText == 0) {
-		alert("incorrect username or password")
-		username.value = ""
-		password.value = ""
+	xhttp.send(`user_id=${user_id.value}&password=${password.value}`)
+    let resp = JSON.parse(xhttp.responseText)
+	if (resp.state) {
+		window.location.href = "/"
+	} else {
+		alert("wrong password or user_id")
 	}
-	else {
-		window.location.href = xhttp.responseText
-	}
-
 }
 
-console.log('loginpg.js loaded')
 function xxx() {
 	console.log('a')
 }

@@ -1,13 +1,13 @@
 var app = new Vue({
 	el: "#root",
 	data: {
-		id: "",
+		isbn: "",
 	},
 	methods:{
 		addToCart: function () {
 			if (hasUser()) {
-				var xhttp = new XMLHttpRequest()
-				xhttp.open("GET", `/addToCart?id=${this.id}`)
+				const xhttp = new XMLHttpRequest();
+				xhttp.open("GET", `/addToCart?isbn=${this.isbn}`)
 				xhttp.send()
 			} else {
 				window.location.href = "/loginpg"
@@ -15,18 +15,18 @@ var app = new Vue({
 		}
 	},
 	created() {
-		this.id = getId()
+		this.isbn = getId()
 	}
 })
 
 
 function getId() {
 	const urlParams = new URLSearchParams(window.location.search)
-	return urlParams.get("id")
+	return urlParams.get("isbn")
 }
 
 function hasUser() {
-	return getCookie("username") != null;
+	return getCookie("user_id") != null;
 }
 
 function getCookie(name) {

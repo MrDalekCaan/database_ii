@@ -1,8 +1,10 @@
+import datetime
 import e_shop_user as eu
 import time
 from collections import defaultdict
 from constrainfactory import Constrain
-
+from Cache import Cache
+from Constants import LIFE_TIME
 import log
 
 
@@ -17,7 +19,7 @@ class frange():
 
 cursor = eu.e_shop_cursor
 
-cache: eu.EShopUser = {}
+cache: eu.EShopUser = Cache(LIFE_TIME)
 
 _columns = {}
 _category = None
@@ -27,20 +29,19 @@ def login(user_id, passwd):
 	"""
 	:param user_id:
 	:param passwd:
-	:return: user_name(success)
-				None(failed)
+	:return: user_name, type(success)
+				None, None(failed)
 	"""
 	if user_id in cache.keys():
-		cache[user_id]["time_added"] = time.time()
-		return cache[user_id]["user"].user_name
+		return cache[user_id].user_name, cache[user_id].type
 	user = eu.login(user_id, passwd)
 	if user:
-		cache["user_id"] = {"user": user, "time_added": time.time()}
-		return user.user_name
-	return None
+		cache[user_id] = user
+		return user.user_name, user.type
+	return None, None
 
 
-def get_cats():
+def _get_cats():
 	global _category
 	if _category is not None:
 		return _category
@@ -53,6 +54,13 @@ def get_cats():
 
 
 def get_books(f, count, price_region=None, subcat=None):
+	"""
+	:param f: from type int
+	:param count: type int
+	:param price_region: [low, high], [None, high], [low, None] default None
+	:param subcat: subcat in database default None
+	:return:list[books] satisfy requirement
+	"""
 	constrain = Constrain()
 	constrain.apply_constraint_value("sub", subcat).apply_constraint_region("price", price_region)
 	cursor.execute(f"SELECT * FROM book_info WHERE {constrain}")
@@ -61,6 +69,10 @@ def get_books(f, count, price_region=None, subcat=None):
 
 	li = [{t[i]: c for i, c in enumerate(content)} for content in contents]
 	end = min(len(li), f + count)
+	result = li[f:end]
+	for content in result:
+		if type(content["publish_time"]) == datetime.date:
+			content["publish_time"] = content["publish_time"].strftime("%Y-%m-%d")
 	return li[f: end]
 
 
@@ -76,8 +88,8 @@ def userbooklist(username):
 # id,bookname,imgurl,price,count
 
 
-def updateUserBooklist(username, operation, **kwargs):
-	'''
+def updateUserBooklist(user_id, operation, isbn, count=None):
+	"""
     operation:
         0-insert
         1-update
@@ -85,12 +97,14 @@ def updateUserBooklist(username, operation, **kwargs):
 
     return:
         boolean
-    '''
-
+    """
+	now = '{0:%Y%m%d%H%M%S}'.format(datetime.datetime.now())
+	user: eu.Customer = cache[user_id]
 	if operation == 0:
 		# do nothing if book already in cart
 		# cursor.execute(f'')
-		print(f"book {kwargs['id']} add to cart")
+		user.add_shopping_cart(isbn, now)
+		log.info(f"user {user_id} add book {isbn} to shopping cart")
 		pass
 	elif operation == 1:
 		pass
@@ -100,8 +114,20 @@ def updateUserBooklist(username, operation, **kwargs):
 	pass
 
 
-def history(username, bookid, time):
-	pass
+def history(user_id, isbn, visit_time) -> bool:
+	"""
+	:param user_id:
+	:param isbn:
+	:param visit_time:
+	:return: True(success) False(failed, maybe login expired)
+	"""
+	try:
+		user: eu.Customer = cache[user_id]
+	except KeyError:
+		log.debug(f"Cannot find user: {user_id}")
+		return False
+	user.add_history_record(isbn, visit_time)
+	return True
 
 
 def updateBook(id, author, bookname, imgurl, price):
@@ -136,3 +162,14 @@ def read_columns(table_name):
 	result = [content[0] for content in result]
 	_columns[table_name] = result
 	return result
+
+
+def get_book_by_isbn(isbn):
+	cursor.execute(f"SELECT * FROM book_info WHERE ISBN='{isbn}'")
+	result = cursor.fetchone()
+	t = read_columns("book_info")
+	if result is not None:
+		result = {key: value for key, value in zip(t, result)}
+		return result
+	else:
+		return None

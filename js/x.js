@@ -71,15 +71,16 @@ var app = new Vue({
 
 			// reach the end
 			// other_books = xmlRequest('xxx', 0, 9)
+			let other_books;
 			if (!this.filter) {
-				other_books = xmlRequest(this.curTitle(), this.books.length, this.pageSize, null, null)
+				other_books = xmlRequest(this.curTitle(), this.books.length, this.pageSize)
 			} else {
 				other_books = xmlRequest(this.curTitle(), this.books.length, this.pageSize, this.low, this.high)
 			}
 			this.books.push(...other_books)
 		},
 		curTitle: function() {
-			return this.titles[this.selected[0]].titles[this.selected[1]];
+			return this.titles[this.selected[0]].subcat[this.selected[1]];
 		},
 		startFilter: function (){
 			if (this.filter)
@@ -106,24 +107,23 @@ var app = new Vue({
 		let resp
 		try{
 			resp = JSON.parse(xhttp.responseText)
-            this.titles = resp
+			let result = []
+			for (const cat in resp) {
+				let obj = {"subcat": resp[cat], "cat": cat}
+				result.push(obj)
+			}
+            this.titles = result
 		} catch (e) {
 			console.log("cats json parse error")
 		}
 	}
 });
 
-function xmlRequest(cat, from=0, count=30, low=null, high=null) {
-	var xhttp = new XMLHttpRequest()
-	// if (cat != null){
-	xhttp.open("GET", `books?cat=${cat}&from=${from}&count=${count}&low=${low}&high=${high}`, false)
-	// }
-	// else if (code != null) {
-	// 	xhttp.open("GET", `book?code=${code}`, false)
-	// }
-	// else return [];
+function xmlRequest(subcat, from=0, count=30, low='', high='') {
+	const xhttp = new XMLHttpRequest();
+	xhttp.open("GET", `books?subcat=${subcat}&from=${from}&count=${count}&low=${low}&high=${high}`, false)
 	xhttp.send()
-	var obj;
+	let obj;
 	try {
 		obj = JSON.parse(xhttp.responseText)
 	} catch(e) {
@@ -135,21 +135,21 @@ function xmlRequest(cat, from=0, count=30, low=null, high=null) {
 
 }
 
-// (async function(){
-// 	var ele = document.getElementById('aspace2')
-// 	if (ele == null)
-// 		return;
+(async function(){
+	var ele = document.getElementById('aspace2')
+	if (ele == null)
+		return;
 
-// 	var pageSize = 0
+	var pageSize = 0
 
-// 	while (ele.clientHeight == ele.scrollHeight) {
-// 		pageSize += 3
-// 		// app.books.push(...xmlRequest('xxx', 0, 3))
-// 		app.books.push(...xmlRequest(app.curTitle(), app.books.length, 3))
-// 		await new Promise(r => setTimeout(r, 100));
-// 	}
-// 	app.pageSize = pageSize
-// })();
+	while (ele.clientHeight == ele.scrollHeight) {
+		pageSize += 3
+		// app.books.push(...xmlRequest('xxx', 0, 3))
+		app.books.push(...xmlRequest(app.curTitle(), app.books.length, 3))
+		await new Promise(r => setTimeout(r, 100));
+	}
+	app.pageSize = pageSize
+})();
 
 var obj;
 

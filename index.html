@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html xmlns:v-on="http://www.w3.org/1999/xhtml" xmlns:v-bind="http://www.w3.org/1999/xhtml">
 	<head>
 		<meta charset="utf-8">
 		<title>旺仔的光影小店 光影 时光</title>
@@ -39,22 +39,10 @@
 					<ul class="daogoulist">
 						<li>页面向导</li>
 
-						<!-- <template v-for='(title, x) in titles'> -->
-							<!-- <li v-for='(title, x) in titles'>
-								<span style="color: aliceblue">{{ title.cat }}</span>
+							<li v-for='(obj, x) in titles'>
+								<span style="color: aliceblue">{{ obj.cat }}</span>
 								<ul>
-									<li v-for='(t, y) in title.titles' 
-									:id="'title-' + x + '-' + y" 
-									:class="{ selectedcat: x == selected[0] && y == selected[1] }"
-									@click="chosecat">
-										<span>{{ t }}</span>
-									</li>
-								</ul>
-							</li> -->
-							<li v-for='(content, propertyname, x) in titles'>
-								<span style="color: aliceblue">{{ propertyname }}</span>
-								<ul>
-									<li v-for='(t, y) in content' 
+									<li v-for='(t, y) in obj.subcat' 
 									:id="'title-' + x + '-' + y" 
 									:class="{ selectedcat: x == selected[0] && y == selected[1] }"
 									@click="chosecat">
@@ -70,10 +58,10 @@
 			</div>
 		
 			<div id="aspace2" v-on:scroll="scroll">
-				<a v-for="(book, v) in books" :id="'book-' + v " :key="book.id" :href="'/book_info?id=' + book.id">
-					<p>book name: {{ book.bookname }}</p>
+				<a v-for="(book, v) in books" :id="'book-' + v " :key="book.id" :href="'/book_info?isbn=' + book.ISBN">
+					<p>book name: {{ book.book_name }}</p>
 					<p>book price: {{ book.price }}</p>
-					<img v-bind:src="book.imgurl">
+					<img v-bind:src="book.img_url">
 				</a>
 			</div>
 

@@ -57,7 +57,7 @@ class EShopUser:
 		table_names = ""
 		for table_name in tables:
 			table_names += f"{table_name}, "
-		table_names = table_names.strip(',')
+		table_names = table_names.strip(', ')
 		log.info(f"delete tables: {table_names} from database: {self.database_name()}")
 		self.cursor.execute(f"DROP TABLES IF EXISTS {table_names}")
 		return True
@@ -105,36 +105,56 @@ class Customer(EShopUser):
 		self.cursor.execute("SHOW TABLES")
 		tables = self.cursor.fetchall()
 		tables = [content[0] for content in tables]
-		if "shopping_cart" not in tables or "browser_history" not in tables or "purchase_history":
+		if "shopping_cart" not in tables or "browser_history" not in tables or "purchase_history" not in tables:
 			log.warn(f"Get table {tables}, should get table: shopping_cart, browser_history, purchase_history")
 			log.info(f"Recreating tables: shopping_cart, browser_history, purchase_history")
 			self.recreate_table()
-
-	# check end
+		# check end
 
 	def recreate_table(self):
 		self.delete_tables()
 		definition = '''
-		ISBN VARCHAR(20) NOT NULL,	
+		ISBN VARCHAR(20) PRIMARY KEY NOT NULL,	
 		count INT,
+		time DATETIME,
 		FOREIGN KEY (ISBN) REFERENCES book_e_shop.book_info(ISBN) 
 		'''
 		self.create_table("shopping_cart", definition)
 
 		definition = '''
 		ISBN VARCHAR(20) NOT NULL,
-		time DATE,
+		time DATETIME,
 		FOREIGN KEY (ISBN) REFERENCES book_e_shop.book_info(ISBN)	
 		'''
 		self.create_table("browser_history", definition)
 
 		definition = '''
 		ISBN VARCHAR(20) NOT NULL,	
-		time DATE, 
+		time DATETIME, 
 		count INT,
 		FOREIGN KEY (ISBN) REFERENCES book_e_shop.book_info(ISBN)	
 		'''
 		self.create_table("purchase_history", definition)
+
+	def add_history_record(self, isbn, visit_time):
+		self.cursor.execute(f"INSERT INTO browser_history(ISBN, time) VALUES ({isbn}, {visit_time})")
+		self.db.commit()
+
+	def add_shopping_cart(self, isbn, add_time):
+		try:
+			self.cursor.execute(f"INSERT INTO shopping_cart(isbn, count, time) VALUES ({isbn}, 1, {add_time})")
+		except mysql.connector.errors.IntegrityError:
+			self.cursor.execute(f"SELECT count FROM shopping_cart WHERE ISBN='{isbn}'")
+			count = self.cursor.fetchone()[0]
+			self.cursor.execute(f"UPDATE shopping_cart SET count={count + 1} WHERE ISBN='{isbn}'")
+		finally:
+			self.db.commit()
+
+	def get_shopping_cart(self):
+		self.cursor.execute(f"SELECT * FROM shopping_cart ORDER BY time DESC")
+		result = self.cursor.fetchall()
+		# TODO: HERE
+		pass
 
 
 class Admin(EShopUser):
@@ -166,7 +186,7 @@ class Admin(EShopUser):
 		property VARCHAR(15),
 		new_value VARCHAR(400),
 		old_value VARCHAR(400),
-		time DATE,
+		time TIMESTAMP,
 		FOREIGN KEY (ISBN) REFERENCES book_e_shop.book_info(ISBN)
 		'''
 		self.create_table('change_history', definition)
@@ -202,6 +222,7 @@ def register(user_name, password):
 														('{user_name}', '{user_id}', '{password}', '0001')""")
 	book_e_shop.commit()
 	return user_id
+
 
 '''
 import e_shop_user as e

@@ -151,7 +151,7 @@ def build_book_e_shop():
 	definition = '''
 	ISBN VARCHAR(20),
 	count INT,
-	time DATE,
+	time DATETIME,
 	FOREIGN KEY(ISBN) REFERENCES book_info(ISBN)
 	'''
 	create_table('shopping_history', definition)

@@ -4,12 +4,12 @@ from http.server import HTTPServer
 from http.server import BaseHTTPRequestHandler
 from flask import Flask, render_template, request, redirect, make_response, send_from_directory
 import time
+import datetime
 import json
-
+from Constants import LIFE_TIME
 # from untitled import books
 import backend as B
-
-LIFE_TIME = 60 * 60 * 10
+import log
 
 
 class CustomFlask(Flask):
@@ -37,21 +37,27 @@ def readfile(filename):
 	return content
 
 
-def getusername():
-	'''
+def get_user_id():
+	"""
 	get username from cookies if there is one
-	'''
-	return request.cookies.get('username')
+	"""
+	return request.cookies.get('user_id')
 
 
 def get_user_name():
 	return request.cookies.get("user_name")
 
 
-def updateLogin(resp):
-	username = getusername()
-	if username:
-		resp.set_cookie('username', getusername(), max_age=LIFE_TIME)
+def get_user_type():
+	return request.cookies.get("user_type")
+
+
+def update_login(resp):
+	user_id = get_user_id()
+	if user_id:
+		resp.set_cookie('user_id', get_user_id(), max_age=LIFE_TIME)
+		resp.set_cookie('user_name', get_user_name(), max_age=LIFE_TIME)
+		resp.set_cookie('user_type', get_user_type(), max_age=LIFE_TIME)
 
 
 def parseParameter(string):
@@ -75,7 +81,7 @@ def root():
 
 @app.route('/index')
 def index():
-	username = getusername()
+	user_id = get_user_id()
 	# ! need username from backend
 	# username = b.getusername(username)
 	kwargs = {
@@ -87,11 +93,11 @@ def index():
 		"history_link": "",
 		"display": "none"
 	}
-	if username is not None:
+	if user_id is not None:
 		kwargs["loginpg"] = "#"
 		kwargs["cart_link"] = "/shoppingcartpg"
 		kwargs["cart"] = "购物车"
-		kwargs["username"] = username
+		kwargs["username"] = get_user_name()
 		kwargs["history"] = "历史记录"
 		kwargs["history_link"] = "/historypg"
 		kwargs["display"] = ""
@@ -149,11 +155,13 @@ def login():
 		password = request.args.get('password')
 
 	res = {"state": False}
-	user_name = B.login(user_id, password)
+	user_name, user_type = B.login(user_id, password)
 	if user_name:
 		res["state"] = True
 		resp = make_response(json.dumps(res))
 		resp.set_cookie("user_name", user_name, max_age=LIFE_TIME)
+		resp.set_cookie("user_id", user_id, max_age=LIFE_TIME)
+		resp.set_cookie("user_type", user_type, max_age=LIFE_TIME)
 	else:
 		resp = make_response(json.dump(res))
 	return resp
@@ -161,29 +169,27 @@ def login():
 
 @app.route("/cats")
 def get_cats():
-	return json.dumps(B.get_cats())
+	return json.dumps(B._get_cats())
 
 
 @app.route('/books')
 def get_books():
-	print(request.args)
-	cat = request.args.get('cat')
+	log.debug(request.args)
+	subcat = request.args.get('subcat')
 	f = int(request.args.get('from'))
 	count = int(request.args.get('count'))
 	low = request.args.get('low')
 	high = request.args.get('high')
-	if low == 'null':
+	if low == '':
 		low = None
 	else:
-		low = int(request.args.get('low'))
-	if high == 'null':
+		low = int(low)
+	if high == '':
 		high = None
 	else:
-		high = int(request.args.get('high'))
-	bks = B.get_books(cat, f, count, low, high)
-	# bks = books(cat, f, count, low, high)
+		high = int(high)
+	bks = B.get_books(f, count, price_region=[low, high], subcat=subcat)
 	bks = {"content": bks}
-
 	return json.dumps(bks)
 
 
@@ -210,16 +216,17 @@ def padzero(t):
 
 
 @app.route("/book_info")
-def bookInfo():
-	username = getusername()
-	bookid = request.args.get("id")
-	book = B.getBookById(bookid)
-	t = time.gmtime()
-	if username:
-		B.history(username, bookid,
-				  f'{t.tm_year}{padzero(t.tm_mon)}{padzero(t.tm_mday)}{padzero((t.tm_hour + 8) % 24)}{padzero(t.tm_min)}{padzero(t.tm_sec)}')
+def get_book_info():
+	"""
+	When user call this function, a browser history will record
+	"""
+	user_id = get_user_id()
+	isbn = request.args.get("isbn")
+	book = B.get_book_by_isbn(isbn)
+	if user_id:
+		B.history(user_id, isbn, '{0:%Y%m%d%H%M%S}'.format(datetime.datetime.now()))
 	resp = make_response(render_template(book_infopg, **book))
-	updateLogin(resp)
+	update_login(resp)
 	return resp
 
 
@@ -269,45 +276,45 @@ def manageDelete():
 
 # --------------user-------------
 @app.route("/addToCart")
-def addToCart():
-	username = getusername()
-	id = request.args.get("id")
-	B.updateUserBooklist(username, 0, id, 1)
+def add_to_cart():
+	user_id = get_user_id()
+	isbn = request.args.get("isbn")
+	B.updateUserBooklist(user_id, 0, isbn, 1)
 	return '0'
 
 
 @app.route("/shoppingcartpg")
 def shoppingcartpg():
-	username = getusername()
+	username = get_user_id()
 	if username is None:
 		return redirect("/loginpg")
 	resp = render_template("shoppingcart.html", username=username, loginpg='#', cart_history="shoppingcart")
 	resp = make_response(resp)
-	updateLogin(resp)
+	update_login(resp)
 	return resp
 
 
 @app.route("/historypg")
 def historypg():
-	username = getusername()
+	username = get_user_id()
 	if username is None:
 		return redirect("/loginpg")
 	resp = render_template("shoppingcart.html", username=username, loginpg='#', cart_history="history")
 	resp = make_response(resp)
-	updateLogin(resp)
+	update_login(resp)
 	return resp
 
 
 @app.route('/history')
 def history():
-	username = getusername()
+	username = get_user_id()
 	content = B.getVisitlogs(username)
 	return json.dumps({"content": content})
 
 
 @app.route("/shoppingcart")
 def shoppingcart():
-	username = getusername()
+	username = get_user_id()
 	if not username:
 		return redirect("/loginpg")
 
@@ -319,13 +326,13 @@ def shoppingcart():
 
 	res = {"content": res}
 	resp = make_response(json.dumps(res))
-	updateLogin(resp)
+	update_login(resp)
 	return resp
 
 
 @app.route("/shoppingcartChange")
 def changenum():
-	username = getusername()
+	username = get_user_id()
 	if username is None:
 		return redirect("/loginpg")
 	id = request.args.get("id")

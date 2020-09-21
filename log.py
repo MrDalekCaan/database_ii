@@ -87,22 +87,22 @@ def prefix(color, content):
 def info(content):
 	if LogLevel & logLevel.Info != logLevel.Info:
 		return
-	print(prefix(_info, 'INFO') + content, file=_out)
+	print(prefix(_info, 'INFO') + str(content), file=_out)
 
 
 def warn(content):
 	if LogLevel & logLevel.Warn != logLevel.Warn:
 		return
-	print(prefix(_warn, 'WARN') + content, file=_out)
+	print(prefix(_warn, 'WARN') + str(content), file=_out)
 
 
 def fatal(content):
 	if LogLevel & logLevel.Fatal != logLevel.Fatal:
 		return
-	print(prefix(_fatal, 'FATA') + content, file=_out)
+	print(prefix(_fatal, 'FATA') + str(content), file=_out)
 
 
 def debug(content):
 	if LogLevel & logLevel.Debug != logLevel.Debug:
 		return
-	print(prefix(_debug, 'DBUG') + content, file=_out)
+	print(prefix(_debug, 'DBUG') + str(content), file=_out)
