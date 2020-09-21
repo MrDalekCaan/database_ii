@@ -66,16 +66,15 @@ def build_data(cat, csv_filename) -> str:
 	df.fillna('', inplace=True)
 	df.loc[:, 'ISBN'] = df.loc[:, 'ISBN'].astype('str')
 	digit = ~df.loc[:, 'ISBN'].str.isdigit()
-
 	def lam(isbn):
 		return re.sub(r'[^0-9]', '', isbn)
-
 	df.loc[digit, 'ISBN'] = df.loc[digit, 'ISBN'].apply(lam)
 	df.loc[:, 'publish_time'] = df.loc[:, 'publish_time'].apply(correctify_datetime)
 	digit = df.loc[:, 'ISBN'].str.isdigit()
 	df = df.loc[digit, :].reset_index(drop=True)
 	df['is_suit'].where(df['is_suit'] == '是', other='0', inplace=True)
 	df['is_suit'].where(df['is_suit'] == '0', other='1', inplace=True)
+	df.drop_duplicates(subset='ISBN', inplace=True)
 
 	def to_string(row):
 		string = ""

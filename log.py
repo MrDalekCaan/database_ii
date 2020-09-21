@@ -62,14 +62,14 @@ class logLevel:
 	Verbose = 0x10
 
 
-__fatal = Red
-__debug = Yellow
-__info = Cyan
-__warn = LightYellow
+_fatal = Red
+_debug = Yellow
+_info = Cyan
+_warn = LightYellow
 
 LogLevel = logLevel.Info | logLevel.Debug | logLevel.Fatal | logLevel.Warn
 
-__out = sys.stdout
+_out = sys.stdout
 
 
 def formated_time():
@@ -87,22 +87,22 @@ def prefix(color, content):
 def info(content):
 	if LogLevel & logLevel.Info != logLevel.Info:
 		return
-	print(prefix(__info, 'INFO') + content, file=__out)
+	print(prefix(_info, 'INFO') + content, file=_out)
 
 
 def warn(content):
 	if LogLevel & logLevel.Warn != logLevel.Warn:
 		return
-	print(prefix(__warn, 'WARN') + content, file=__out)
+	print(prefix(_warn, 'WARN') + content, file=_out)
 
 
 def fatal(content):
 	if LogLevel & logLevel.Fatal != logLevel.Fatal:
 		return
-	print(prefix(__fatal, 'FATA') + content, file=__out)
+	print(prefix(_fatal, 'FATA') + content, file=_out)
 
 
 def debug(content):
 	if LogLevel & logLevel.Debug != logLevel.Debug:
 		return
-	print(prefix(__debug, 'DBUG') + content, file=__out)
+	print(prefix(_debug, 'DBUG') + content, file=_out)

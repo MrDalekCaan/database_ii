@@ -115,21 +115,21 @@ class Customer(EShopUser):
 	def recreate_table(self):
 		self.delete_tables()
 		definition = '''
-		ISBN VARCHAR(20),	
+		ISBN VARCHAR(20) NOT NULL,	
 		count INT,
 		FOREIGN KEY (ISBN) REFERENCES book_e_shop.book_info(ISBN) 
 		'''
 		self.create_table("shopping_cart", definition)
 
 		definition = '''
-		ISBN VARCHAR(20),
+		ISBN VARCHAR(20) NOT NULL,
 		time DATE,
 		FOREIGN KEY (ISBN) REFERENCES book_e_shop.book_info(ISBN)	
 		'''
 		self.create_table("browser_history", definition)
 
 		definition = '''
-		ISBN VARCHAR(20),	
+		ISBN VARCHAR(20) NOT NULL,	
 		time DATE, 
 		count INT,
 		FOREIGN KEY (ISBN) REFERENCES book_e_shop.book_info(ISBN)	
@@ -156,12 +156,13 @@ class Admin(EShopUser):
 			log.warn(f"Get table {tables}, should get table: change_history")
 			log.info(f"Recreating table: change_history")
 			self.recreate_table()
-		# end check
+
+	# end check
 
 	def recreate_table(self):
 		self.delete_tables()
 		definition = '''
-		ISBN VARCHAR(20),
+		ISBN VARCHAR(20) NOT NULL,
 		property VARCHAR(15),
 		new_value VARCHAR(400),
 		old_value VARCHAR(400),
@@ -177,6 +178,7 @@ def login(user_id, password):
 	:param password:
 	:return: None(login failed) EShopUser(login success)
 	"""
+	password = str(password)
 	e_shop_cursor.execute(f"SELECT * FROM user WHERE user_id = '{user_id}'")
 	user_info = e_shop_cursor.fetchone()
 	if user_info is None:
@@ -188,12 +190,20 @@ def login(user_id, password):
 	elif user_info[3] == '0001':
 		return Customer(user_info[1], user_info[0])
 
+
 def register(user_name, password):
+	user_id = int(abs(hash(f"{user_name}{time.time()}")) % 1e7)
+	while True:
+		e_shop_cursor.execute(f"SELECT user_id FROM user WHERE user_id={user_id}")
+		if not e_shop_cursor.fetchone():
+			break
 		user_id = int(abs(hash(f"{user_name}{time.time()}")) % 1e7)
-		e_shop_cursor.execute(f"""INSERT INTO user(user_name, user_id, password, type) VALUE 
-														({user_name}, {user_id}, {password}, '0001')""")
+	e_shop_cursor.execute(f"""INSERT INTO user(user_name, user_id, password, type) VALUES 
+														('{user_name}', '{user_id}', '{password}', '0001')""")
+	book_e_shop.commit()
+	return user_id
 
 '''
- import e_shop_user as e
- from importlib import reload
+import e_shop_user as e
+from importlib import reload
 '''

@@ -26,16 +26,15 @@ var app = new Vue({
 			var index = e.index
 			var id = target.id;
 			var inputs = target.getElementsByTagName("input")
-			var bookid = inputs[0].value
 			var bookname = inputs[1].value
 			var author = inputs[2].value
 			var price = inputs[3].value
 			var imgurl = inputs[4].value
 
 			//send change request
-			var obj = sendChangeReq(id, bookid, bookname, author, price, imgurl)
+			var obj = sendChangeReq(id, bookname, author, price, imgurl)
 			var newbook = {
-				"id": obj.newid,
+				"id": obj.id,
 				"bookname": obj.bookname,
 				"author": obj.author,
 				"imgurl": obj.imgurl,
@@ -50,16 +49,14 @@ var app = new Vue({
 			xhttp.open("POST", "manage/delete", false)
 			xhttp.send(`id=${id}`)
 			console.log(xhttp.responseText)
-			if (xhttp.responseText == 0) {
+			if (xhttp.responseText == "0") {
 				// failed
 				return
 			}
 			// else 
 			this.updatePage()
-
 		},
 		chosecat: function(e) {
-
 			var howMuchBookDoYouWant = this.pagesize
 			var target = e.target;
 			// if (target.tagName == 'LI') {
@@ -78,18 +75,38 @@ var app = new Vue({
 				this.$set(this.selected, 0, tempsplit[1])
 				this.$set(this.selected, 1, tempsplit[2])
 			}
-
 			this.updatePage()
 			// var cat = this.titles[tempsplit[1]].titles[tempsplit[2]]
 			// console.log("selected cat is " + cat)
+		},
+		lastpage: function(e) {
+			if (this.pagecount == 1) {
+				return
+			}
+			this.pagecount = this.pagecount - 1
+			if (!this.updatePage()) {
+				// update failed
+				this.pagecount = this.pagecount + 1
+			}
+		},
+		nextpage: function (e) {
+			this.pagecount = this.pagecount + 1
+			if (!this.updatePage()) {
+				// update failed
+				this.pagecount = this.pagecount - 1
+			}
 		},
 		curTitle: function() {
 			return this.titles[this.selected[0]].titles[this.selected[1]];
 		},
 		updatePage: function() {
 			var cat = this.curTitle()
-			var newbooks = xmlRequest(cat, 0, this.pagesize)
+			var newbooks = xmlRequest(cat, (this.pagecount - 1) * this.pagesize, this.pagesize)
+			if (newbooks.length == 0) {
+				return false;
+			}
 			this.books = newbooks
+			return true;
 		},
 	}
 		
@@ -97,10 +114,10 @@ var app = new Vue({
 
 // change if there is a book
 //create  new book if there is  no book
-function sendChangeReq(oldid, newid, bookname, author, price, imgurl) {
+function sendChangeReq(id, bookname, author, price, imgurl) {
 	var xhttp = new XMLHttpRequest()
 	xhttp.open("POST", 'manage/change', false)
-	xhttp.send(`oldid=${oldid}&newid=${newid}&bookname=${bookname}&author=${author}&price=${price}&imgurl=${imgurl}`)
+	xhttp.send(`id=${id}&bookname=${bookname}&author=${author}&price=${price}&imgurl=${imgurl}`)
 	var obj = JSON.parse(xhttp.responseText)
 	return obj.content
 }
@@ -137,7 +154,7 @@ function xmlRequest(cat=null, from=0, count=30, code=null) {
 	while (ele.clientHeight == ele.scrollHeight) {
 		count++;
 		// app.books.push(...xmlRequest('xxx', 0, 3))
-		app.books.push(...xmlRequest(app.curTitle(), 0, 1))
+		app.books.push(...xmlRequest(app.curTitle(), app.books.length, 1))
 		await new Promise(r => setTimeout(r, 80));
 	}
 	app.pagesize = count;

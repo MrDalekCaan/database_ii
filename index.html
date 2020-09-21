@@ -4,15 +4,28 @@
 		<meta charset="utf-8">
 		<title>旺仔的光影小店 光影 时光</title>
 		<link type="text/css" rel="stylesheet" href="css/style1.css">
+		<script src="./js/util.js"></script>
 	</head>
 	<body background="img/background5.jpg"background-size="100%">
 		<div class="top"><!--top是页面顶部一栏-->
-		<div align="center"><a href="[[ loginpg ]]"><font face="方正舒体" size="5" color="aliceblue">[[ username ]]</a></div>
+			<div align="center">
+				<a href="[[ loginpg ]]"><font face="方正舒体" size="5" color="aliceblue">[[ username ]]</a>
+				<a href="[[ cart_link ]]" style="display: [[ display ]]">[[ cart ]]</a>
+				<a href="[[ history_link ]]" style="display: [[ display ]]">[[ history ]]</a>
+				<a href="#" style="display: [[ display ]]" onclick="quit(); return false;">退出登陆</a>
+			</div>
 		</div>
 		
 		
 		<div id='app'>
 			<div id="aspace1">
+				<div class="filterComponent">
+					<p style="font-size: 13px;">筛选</p>
+					<input type="number" placeholder="最低价" v-model="low" id="low" @change="boundChange">
+					<input type="number" placeholder="最高价" v-model="high" id="high" @change="boundChange">
+					<button @click="startFilter">确定</button>
+					<button @click="cancleFilter">取消</button>
+				</div>
 				<div class="headpic">
 					<img src="img/headpic.jpg">
 				</div>
@@ -26,8 +39,8 @@
 					<ul class="daogoulist">
 						<li>页面向导</li>
 
-						<template v-for='(title, x) in titles'>
-							<li>
+						<!-- <template v-for='(title, x) in titles'> -->
+							<!-- <li v-for='(title, x) in titles'>
 								<span style="color: aliceblue">{{ title.cat }}</span>
 								<ul>
 									<li v-for='(t, y) in title.titles' 
@@ -37,8 +50,19 @@
 										<span>{{ t }}</span>
 									</li>
 								</ul>
+							</li> -->
+							<li v-for='(content, propertyname, x) in titles'>
+								<span style="color: aliceblue">{{ propertyname }}</span>
+								<ul>
+									<li v-for='(t, y) in content' 
+									:id="'title-' + x + '-' + y" 
+									:class="{ selectedcat: x == selected[0] && y == selected[1] }"
+									@click="chosecat">
+										<span>{{ t }}</span>
+									</li>
+								</ul>
 							</li>
-						</template>
+						<!-- </template> -->
 
 						
 					</ul>
@@ -46,22 +70,22 @@
 			</div>
 		
 			<div id="aspace2" v-on:scroll="scroll">
-				<div v-for="(book, v) in books" :id="'book-' + v ">
+				<a v-for="(book, v) in books" :id="'book-' + v " :key="book.id" :href="'/book_info?id=' + book.id">
 					<p>book name: {{ book.bookname }}</p>
 					<p>book price: {{ book.price }}</p>
 					<img v-bind:src="book.imgurl">
-				</div>
+				</a>
 			</div>
 
 		</div>	
 		
 		<div class="bottom"><!--页面底部-->
-			<p align="center"><font color="aliceblue" size="3">版权所有 1346981567@qq.com</font></p>
+			<p align="center"></p>
 		</div>
 
 		<!-- <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script> -->
 		<script src="js/vue.js"></script>
-		<script src="/js/x.js"></script>
+		<script src="js/x.js"></script>
 
 	</body>
 </html>
