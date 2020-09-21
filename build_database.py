@@ -90,7 +90,7 @@ def build_data(cat, csv_filename) -> str:
 		data += row
 	data = data.strip(' ,')
 	column_name = ""
-	for column in df.columns:
+	for column in df._columns:
 		column_name += f"{column},"
 	column_name += f"cat, sub"
 	column_name = f"({column_name.strip(' ,')})"

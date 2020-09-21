@@ -163,8 +163,9 @@ def login():
 def get_cats():
 	return json.dumps(B.get_cats())
 
+
 @app.route('/books')
-def getbooks():
+def get_books():
 	print(request.args)
 	cat = request.args.get('cat')
 	f = int(request.args.get('from'))
@@ -179,7 +180,7 @@ def getbooks():
 		high = None
 	else:
 		high = int(request.args.get('high'))
-	bks = B.findBookList(cat, f, count, low, high)
+	bks = B.get_books(cat, f, count, low, high)
 	# bks = books(cat, f, count, low, high)
 	bks = {"content": bks}
 
@@ -365,6 +366,8 @@ class TCPHandler(BaseRequestHandler):
 		self.data = self.request.recv(4096).strip()
 		print(self.data)
 		self.request.sendall(b"server response")
+
+
 # or use this: self.wfile.write(b"server response")
 
 

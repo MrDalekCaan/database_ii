@@ -7,20 +7,7 @@ var app = new Vue({
 		high:null,
 		filter: false,
 		pageSize: null,
-		titles:[
-		 	{
-		 		cat:'摄影服务',
-		 		titles:['林业', '人工智能', '音乐', '摄影', '变态心理学']
-		 	},
-		 	{
-		 		cat: '创意摄影',
-		 		titles: ['早教-亲子互动', '旅游随笔', '旅途跟拍', '星空摄影', '可爱宝宝']
-		 	},
-		 	{
-		 		cat: '记录时光',
-		 		titles:['儿童成长记录', '定格婚礼瞬间', '仪式全纪实', '老年结婚照']
-		 	}
-		],
+		titles:{},
 		lastValue: {
 			"low": null,
 			"high": null

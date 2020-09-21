@@ -1,7 +1,9 @@
-import mysql.connector
 import e_shop_user as eu
 import time
 from collections import defaultdict
+from constrainfactory import Constrain
+
+import log
 
 
 class frange():
@@ -16,6 +18,9 @@ class frange():
 cursor = eu.e_shop_cursor
 
 cache: eu.EShopUser = {}
+
+_columns = {}
+_category = None
 
 
 def login(user_id, passwd):
@@ -36,12 +41,28 @@ def login(user_id, passwd):
 
 
 def get_cats():
+	global _category
+	if _category is not None:
+		return _category
 	cursor.execute("SELECT DISTINCT cat, sub FROM book_info")
 	cats = cursor.fetchall()
-	cat_sub = defaultdict(list)
+	_category = defaultdict(list)
 	for cat_group in cats:
-		cat_sub[cat_group[0]].append(cat_group[1])
-	return cat_sub
+		_category[cat_group[0]].append(cat_group[1])
+	return _category
+
+
+def get_books(f, count, price_region=None, subcat=None):
+	constrain = Constrain()
+	constrain.apply_constraint_value("sub", subcat).apply_constraint_region("price", price_region)
+	cursor.execute(f"SELECT * FROM book_info WHERE {constrain}")
+	contents = cursor.fetchall()
+	t = read_columns("book_info")
+
+	li = [{t[i]: c for i, c in enumerate(content)} for content in contents]
+	end = min(len(li), f + count)
+	return li[f: end]
+
 
 def userbooklist(username):
 	'''
@@ -83,34 +104,6 @@ def history(username, bookid, time):
 	pass
 
 
-def findBookList(cat, f, count, low=None, high=None):
-	print(f"select * from book_info where bk_type = {cat}")
-	cursor.execute(f"select * from book_info where bk_type = '{cat}'")
-	contents = cursor.fetchall()
-
-	# contents = contents[f:f+count]
-	def lam(e):
-		ee = list(e)
-		try:
-			ee[2] = float(e[2].split('¥')[-1])
-		except Exception as error:
-			ee[2] = 0
-		return ee
-
-	contents = list(map(lam, contents))
-	# remove el not in [low, high]
-	if low is not None and high is not None:
-		fr = frange(low, high)
-		for i in reversed(range(len(contents))):
-			if contents[i][2] not in fr:
-				contents.pop(i)
-
-	t = ['bookname', 'author', 'price', 'type', 'id', 'imgurl']
-	li = [{t[i]: c for i, c in enumerate(content)} for content in contents]
-	end = min(len(li), f + count)
-	return li[f: end]
-
-
 def updateBook(id, author, bookname, imgurl, price):
 	cursor.execute(
 		f"update book_info set bk_author = '{author}',bk_name = '{bookname}',bk_url = '{imgurl}',bk_price = '{price}' where bk_no = '{id}'")
@@ -134,4 +127,12 @@ def updateBook(id, author, bookname, imgurl, price):
 		obj[t[i]] = c
 	return obj
 
-# User1 = User()
+
+def read_columns(table_name):
+	if table_name in _columns.keys():
+		return _columns[table_name]
+	cursor.execute(f"DESC {table_name}")
+	result = cursor.fetchall()
+	result = [content[0] for content in result]
+	_columns[table_name] = result
+	return result
