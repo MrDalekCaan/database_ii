@@ -1,49 +1,12 @@
 var app = new Vue({
 	el: '#aspace2',
 	data: {
-		books: [
-					{bookname: "nnnnnn",
-					count: "222",
-					id: "ppppp",
-					imgurl: "http://img3m3.ddimg.cn/51/25/23977653-1_b_12.jpg"},
-					{bookname: "nnnnnn",
-					count: "222",
-					id: "dd",
-					imgurl: "http://img3m3.ddimg.cn/51/25/23977653-1_b_12.jpg"},
-					{bookname: "nnnnnn",
-					count: "222",
-					id: "ww",
-					imgurl: "http://img3m3.ddimg.cn/51/25/23977653-1_b_12.jpg"},
-					{bookname: "nnnnnn",
-					count: "222",
-					id: " fd",
-					imgurl: "http://img3m3.ddimg.cn/51/25/23977653-1_b_12.jpg"},
-
-					{bookname: "nnnnnn",
-					count: "222",
-					id: "gdh",
-					imgurl: "http://img3m3.ddimg.cn/51/25/23977653-1_b_12.jpg"},
-					],
+		books: [],
 		pageName: "history"
 	},
 	methods: {
 		curTitle: function() {
 			return this.titles[this.selected[0]].titles[this.selected[1]];
-		},
-		addone: function (index) {
-			var id = this.books[index].id
-			var obj = this.books[index]
-			obj.count = parseInt(obj.count) + 1
-			changeCartContent(id, obj.count)
-			this.update(index)
-		},
-		subone:function (index) {
-			var id = this.books[index].id
-			var obj = this.books[index]
-			obj.count = obj.count - 1
-			if (obj.count <= 0) { return }
-			changeCartContent(id, obj.count)
-			this.update(index)
 		},
 		update: function(index) {
 			var cart = xmlRequest()

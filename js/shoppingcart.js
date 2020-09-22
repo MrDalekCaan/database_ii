@@ -1,29 +1,7 @@
 var app = new Vue({
 	el: '#aspace2',
 	data: {
-		books: [
-					{bookname: "nnnnnn",
-					count: "222",
-					id: "ppppp", price: 100,
-					imgurl: "http://img3m3.ddimg.cn/51/25/23977653-1_b_12.jpg"},
-					{bookname: "nnnnnn",
-					count: "222",
-					id: "dd", price: 100,
-					imgurl: "http://img3m3.ddimg.cn/51/25/23977653-1_b_12.jpg"},
-					{bookname: "nnnnnn",
-					count: "222",
-					id: "ww", price: 100,
-					imgurl: "http://img3m3.ddimg.cn/51/25/23977653-1_b_12.jpg"},
-					{bookname: "nnnnnn",
-					count: "222",
-					id: " fd", price: 100,
-					imgurl: "http://img3m3.ddimg.cn/51/25/23977653-1_b_12.jpg"},
-
-					{bookname: "nnnnnn",
-					count: "222",
-					id: "gdh", price: 100,
-					imgurl: "http://img3m3.ddimg.cn/51/25/23977653-1_b_12.jpg"},
-					],
+		books: [],
 		pageName: "cart"
 	},
 	computed:{
@@ -40,24 +18,27 @@ var app = new Vue({
 			return this.titles[this.selected[0]].titles[this.selected[1]];
 		},
 		addone: function (index) {
-			var id = this.books[index].id
-			var obj = this.books[index]
+			const isbn = this.books[index].ISBN;
+			const obj = this.books[index];
 			obj.count = parseInt(obj.count) + 1
-			changeCartContent(id, obj.count)
+			changeCartContent(isbn, obj.count)
 			this.update(index)
 		},
 		subone:function (index) {
-			var id = this.books[index].id
+			var isbn = this.books[index].ISBN
 			var obj = this.books[index]
 			obj.count = obj.count - 1
-			if (obj.count <= 0) { return }
-			changeCartContent(id, obj.count)
+			if (obj.count <= 0) {
+				obj.count = obj.count + 1
+				return
+			}
+			changeCartContent(isbn, obj.count)
 			this.update(index)
 		},
 		update: function(index) {
 			var cart = xmlRequest()
 			if (cart.length > index) {
-				this.$set(this.books, index, cart[index])
+				this.$set(this.books, index, cart[0])
 			}
 		},
 		updateAll: function() {
@@ -65,8 +46,8 @@ var app = new Vue({
 			this.books = cart
 		},
 		del: function (index) {
-			var id = this.books[index].id
-			 changeCartContent(id, 0)
+			var isbn = this.books[index].ISBN
+			 changeCartContent(isbn, 0)
 			 this.updateAll()
 		}
 	},
@@ -76,9 +57,9 @@ var app = new Vue({
 		
 });
 
-function changeCartContent(id, num) {
-	var xhttp = new XMLHttpRequest()
-	xhttp.open('GET', `shoppingcartChange?id=${id}&num=${num}`, false)
+function changeCartContent(isbn, num) {
+	const xhttp = new XMLHttpRequest();
+	xhttp.open('GET', `shoppingcart/change?isbn=${isbn}&num=${num}`, false)
 	xhttp.send()
 }
 

@@ -27,11 +27,12 @@
 
 			<div id="aspace2" class="container" >
 				<div>{{ totalPrice }}</div>
-				<div v-for="(book, index) in books" :key="book.id">
-					<img :src="book.imgurl">
+				<div v-for="(book, index) in books" :key="book.ISBN">
+					<img :src="book.img_url">
 					<span>{{ book.bookname }}</span>
+					<span>{{ book.ISBN }}</span>
 					<span v-if="pageName == 'cart'">{{ book.count }}</span>
-					<span v-if="pageName == 'history'">{{ book.datetime }}</span>
+					<span>{{ book.time }}</span>
 					<button @click="addone(index)" v-if="pageName == 'cart'">add one</button>
 					<button @click="subone(index)" v-if="pageName == 'cart'">sub one</button>
 					<button @click="del(index)" v-if="pageName == 'cart'">delete</button>

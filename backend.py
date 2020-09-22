@@ -1,10 +1,13 @@
 import datetime
+
+from typing import Dict
+
 import e_shop_user as eu
 import time
 from collections import defaultdict
 from constrainfactory import Constrain
 from Cache import Cache
-from Constants import LIFE_TIME
+from Constants import CACHE_TIME
 import log
 
 
@@ -19,8 +22,8 @@ class frange():
 
 cursor = eu.e_shop_cursor
 
-cache: eu.EShopUser = Cache(LIFE_TIME)
-
+user_cache = Cache(CACHE_TIME)
+column_cache = Cache(CACHE_TIME)
 _columns = {}
 _category = None
 
@@ -32,11 +35,11 @@ def login(user_id, passwd):
 	:return: user_name, type(success)
 				None, None(failed)
 	"""
-	if user_id in cache.keys():
-		return cache[user_id].user_name, cache[user_id].type
+	if user_id in user_cache.keys():
+		return user_cache[user_id].user_name, user_cache[user_id].type
 	user = eu.login(user_id, passwd)
 	if user:
-		cache[user_id] = user
+		user_cache[user_id] = user
 		return user.user_name, user.type
 	return None, None
 
@@ -65,7 +68,7 @@ def get_books(f, count, price_region=None, subcat=None):
 	constrain.apply_constraint_value("sub", subcat).apply_constraint_region("price", price_region)
 	cursor.execute(f"SELECT * FROM book_info WHERE {constrain}")
 	contents = cursor.fetchall()
-	t = read_columns("book_info")
+	t = read_columns(cursor, "book_info")
 
 	li = [{t[i]: c for i, c in enumerate(content)} for content in contents]
 	end = min(len(li), f + count)
@@ -76,53 +79,58 @@ def get_books(f, count, price_region=None, subcat=None):
 	return li[f: end]
 
 
-def userbooklist(username):
-	'''
+def get_user_cart(user_id):
+	"""
     return [] if failed
-    '''
+    """
 	# return []
-	return [{"id": "ppppp", "bookname": "nnnnnn", "imgurl": "http://img3m3.ddimg.cn/51/25/23977653-1_b_12.jpg",
-			 "count": "111"}]
+	# try:
+	# 	user = user_cache[user_id]
+	# except KeyError:
+	# 	user = eu.get_user(user_id)
+	# 	user_cache[user_id] = user
+	user = _get_user(user_id)
+	contents = user.get_shopping_cart()
+	t = read_columns(user.cursor, "shopping_cart")
+	li = [{t[i]: c for i, c in enumerate(content)} for content in contents]
+	return [date_time_toString("time", book_info) for book_info in li]
+
+
+# return [{"id": "ppppp", "bookname": "nnnnnn", "imgurl": "http://img3m3.ddimg.cn/51/25/23977653-1_b_12.jpg",
+# 		 "count": "111"}]
 
 
 # id,bookname,imgurl,price,count
 
 
-def updateUserBooklist(user_id, operation, isbn, count=None):
+def update_user_cart(user_id, operation, isbn, count=None):
 	"""
-    operation:
-        0-insert
-        1-update
-        2-delete
-
-    return:
-        boolean
+	:param count:
+	:param isbn:
+	:param user_id:
+	:param operation: 0 delete
+	 							1 update
     """
 	now = '{0:%Y%m%d%H%M%S}'.format(datetime.datetime.now())
-	user: eu.Customer = cache[user_id]
+	user: eu.Customer = user_cache[user_id]
 	if operation == 0:
-		# do nothing if book already in cart
-		# cursor.execute(f'')
 		user.add_shopping_cart(isbn, now)
 		log.info(f"user {user_id} add book {isbn} to shopping cart")
-		pass
 	elif operation == 1:
-		pass
-	elif operation == 2:
-		pass
-
-	pass
+		log.info(f"user {user_id} update book {isbn} to {count}")
+		user.update_shopping_cart(isbn, count, now)
 
 
 def history(user_id, isbn, visit_time) -> bool:
 	"""
+	add history record
 	:param user_id:
 	:param isbn:
 	:param visit_time:
 	:return: True(success) False(failed, maybe login expired)
 	"""
 	try:
-		user: eu.Customer = cache[user_id]
+		user: eu.Customer = user_cache[user_id]
 	except KeyError:
 		log.debug(f"Cannot find user: {user_id}")
 		return False
@@ -154,22 +162,51 @@ def updateBook(id, author, bookname, imgurl, price):
 	return obj
 
 
-def read_columns(table_name):
-	if table_name in _columns.keys():
-		return _columns[table_name]
+def read_columns(cursor, table_name: str):
+	key = hex(id(cursor)) + table_name
+	# if table_name in _columns.keys():
+	# 	return _columns[table_name]
+	if key in column_cache.keys():
+		return column_cache[key]
 	cursor.execute(f"DESC {table_name}")
 	result = cursor.fetchall()
 	result = [content[0] for content in result]
-	_columns[table_name] = result
+	# _columns[table_name] = result
+	column_cache[key] = result
 	return result
 
 
 def get_book_by_isbn(isbn):
 	cursor.execute(f"SELECT * FROM book_info WHERE ISBN='{isbn}'")
 	result = cursor.fetchone()
-	t = read_columns("book_info")
+	t = read_columns(cursor, "book_info")
 	if result is not None:
 		result = {key: value for key, value in zip(t, result)}
 		return result
 	else:
 		return None
+
+
+def get_visit_history(user_id):
+	# try:
+	# 	user = user_cache[user_id]
+	# except KeyError:
+	# 	user = eu.get_user(user_id)
+	user = _get_user(user_id)
+	contents = user.get_history_record()
+	t = read_columns(user.cursor, "browser_history")
+	return [{t[i]: c for i, c in enumerate(content)} for content in contents]
+
+
+def date_time_toString(property_name, book_info):
+	book_info[property_name] = book_info[property_name].strftime("%Y-%m-%d")
+	return book_info
+
+
+def _get_user(user_id):
+	try:
+		user = user_cache[user_id]
+	except KeyError:
+		user = eu.get_user(user_id)
+		user_cache[user_id] = user
+	return user

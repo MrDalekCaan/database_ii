@@ -140,6 +140,10 @@ class Customer(EShopUser):
 		self.cursor.execute(f"INSERT INTO browser_history(ISBN, time) VALUES ({isbn}, {visit_time})")
 		self.db.commit()
 
+	def get_history_record(self):
+		self.cursor.execute(f"SELECT * FROM browser_history")
+		return self.cursor.fetchall()
+
 	def add_shopping_cart(self, isbn, add_time):
 		try:
 			self.cursor.execute(f"INSERT INTO shopping_cart(isbn, count, time) VALUES ({isbn}, 1, {add_time})")
@@ -150,11 +154,20 @@ class Customer(EShopUser):
 		finally:
 			self.db.commit()
 
+	def update_shopping_cart(self, isbn, count, change_time):
+		if int(count) == 0:
+			self.cursor.execute(f"DELETE FROM shopping_cart WHERE ISBN='{isbn}'")
+			self.db.commit()
+		elif int(count) > 0:
+			self.cursor.execute(f"UPDATE shopping_cart SET count={count}, time={change_time} WHERE ISBN='{isbn}'")
+			self.db.commit()
+		else:
+			log.fatal(f"Update shopping_cart for user [{self.user_id}: {self.user_name}] failed, get count={count}")
+
 	def get_shopping_cart(self):
 		self.cursor.execute(f"SELECT * FROM shopping_cart ORDER BY time DESC")
 		result = self.cursor.fetchall()
-		# TODO: HERE
-		pass
+		return result
 
 
 class Admin(EShopUser):
@@ -208,6 +221,17 @@ def login(user_id, password):
 	if user_info[3] == '0000':
 		return Admin(user_info[1], user_info[0])
 	elif user_info[3] == '0001':
+		return Customer(user_info[1], user_info[0])
+
+
+def get_user(user_id):
+	e_shop_cursor.execute(f"SELECT * FROM user WHERE user_id = '{user_id}'")
+	user_info = e_shop_cursor.fetchone()
+	if user_info is None:
+		return None
+	if user_info[3] == '0000':
+		return Admin(user_info[1], user_info[0])
+	if user_info[3] == '0001':
 		return Customer(user_info[1], user_info[0])
 
 

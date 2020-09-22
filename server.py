@@ -230,7 +230,7 @@ def get_book_info():
 	return resp
 
 
-# ----------manager------------
+# ----------manager-----------
 def change(**kw):
 	return kw
 
@@ -279,7 +279,7 @@ def manageDelete():
 def add_to_cart():
 	user_id = get_user_id()
 	isbn = request.args.get("isbn")
-	B.updateUserBooklist(user_id, 0, isbn, 1)
+	B.update_user_cart(user_id, 0, isbn, 1)
 	return '0'
 
 
@@ -296,10 +296,11 @@ def shoppingcartpg():
 
 @app.route("/historypg")
 def historypg():
-	username = get_user_id()
-	if username is None:
+	user_id = get_user_id()
+	if user_id is None:
 		return redirect("/loginpg")
-	resp = render_template("shoppingcart.html", username=username, loginpg='#', cart_history="history")
+	user_name = get_user_name()
+	resp = render_template("shoppingcart.html", username=user_name, loginpg='#', cart_history="history")
 	resp = make_response(resp)
 	update_login(resp)
 	return resp
@@ -307,43 +308,44 @@ def historypg():
 
 @app.route('/history')
 def history():
-	username = get_user_id()
-	content = B.getVisitlogs(username)
+	user_id = get_user_id()
+	content = B.get_visit_history(user_id)
 	return json.dumps({"content": content})
 
 
 @app.route("/shoppingcart")
 def shoppingcart():
-	username = get_user_id()
-	if not username:
+	user_id = get_user_id()
+	if not user_id:
 		return redirect("/loginpg")
 
 	# res = b.userbooklist(username)
-	res = [{'bookname': "nnnnnn",
-			'count': "222",
-			'id': "ppppp",
-			'imgurl': "http://img3m3.ddimg.cn/51/25/23977653-1_b_12.jpg"}]
-
+	# res = [{'bookname': "nnnnnn",
+	# 		'count': "222",
+	# 		'id': "ppppp",
+	# 		'imgurl': "http://img3m3.ddimg.cn/51/25/23977653-1_b_12.jpg"}]
+	res = B.get_user_cart(user_id)
 	res = {"content": res}
 	resp = make_response(json.dumps(res))
 	update_login(resp)
 	return resp
 
 
-@app.route("/shoppingcartChange")
+@app.route("/shoppingcart/change")
 def changenum():
-	username = get_user_id()
-	if username is None:
+	user_id = get_user_id()
+	if user_id is None:
 		return redirect("/loginpg")
-	id = request.args.get("id")
+	isbn = request.args.get("isbn")
 	num = request.args.get("num")
-	if num == '0' or num == 0:
-		B.updateUserBooklist(username, 2, id)
-	else:
-		B.updateUserBooklist(username, 1, id, num)
-
-	content = {"content": []}
-	return json.dumps(content)
+	# if num == '0' or num == 0:
+	# 	B.update_user_cart(user_id, 1, isbn)
+	# else:
+	# 	B.update_user_cart(user_id, 1, isbn, num)
+	B.update_user_cart(user_id, 1, isbn, num)
+	# content = {"content": []}
+	# return json.dumps(content)
+	return "OK"
 
 
 # static file
