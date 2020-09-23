@@ -49,6 +49,11 @@ var app = new Vue({
 			var isbn = this.books[index].ISBN
 			 changeCartContent(isbn, 0)
 			 this.updateAll()
+		},
+		buyThisOne: function(index) {
+			const isbn = this.books[index].ISBN
+			let xhttp = new XMLHttpRequest()
+			xhttp.open("GET", ``)
 		}
 	},
 	created() {

@@ -347,6 +347,14 @@ def changenum():
 	# return json.dumps(content)
 	return "OK"
 
+	@app.route("/purchase")
+	def purchase():
+		user_id = get_user_id()
+		if !user_id:
+			return 
+		isbn = request.args.get('isbn')
+
+
 
 # static file
 @app.route('/css/<path:path>')

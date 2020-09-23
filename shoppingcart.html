@@ -35,6 +35,7 @@
 					<span>{{ book.time }}</span>
 					<button @click="addone(index)" v-if="pageName == 'cart'">add one</button>
 					<button @click="subone(index)" v-if="pageName == 'cart'">sub one</button>
+					<button @click="buyThisOne(index)" v-if="pageName == 'cart'"></button>
 					<button @click="del(index)" v-if="pageName == 'cart'">delete</button>
 				</div>
 			</div>
