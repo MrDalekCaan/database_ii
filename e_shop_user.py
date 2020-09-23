@@ -1,7 +1,7 @@
 import mysql.connector
 import time
 import log
-
+from mysql.connector.errors import IntegrityError
 dbconfig = {
 	'host': "localhost",
 	'user': "root",
@@ -137,37 +137,67 @@ class Customer(EShopUser):
 		self.create_table("purchase_history", definition)
 
 	def add_history_record(self, isbn, visit_time):
-		self.cursor.execute(f"INSERT INTO browser_history(ISBN, time) VALUES ({isbn}, {visit_time})")
-		self.db.commit()
+		try:
+			self.cursor.execute(f"INSERT INTO browser_history(ISBN, time) VALUES ({isbn}, {visit_time})")
+			self.db.commit()
+			return True
+		except IntegrityError:
+			log.fatal(f"Book [{isbn}] doesn't exist.")
+			return False
 
 	def get_history_record(self):
-		self.cursor.execute(f"SELECT * FROM browser_history")
+		self.cursor.execute(f"SELECT * FROM browser_history ORDER BY time DESC")
 		return self.cursor.fetchall()
 
 	def add_shopping_cart(self, isbn, add_time):
 		try:
 			self.cursor.execute(f"INSERT INTO shopping_cart(isbn, count, time) VALUES ({isbn}, 1, {add_time})")
-		except mysql.connector.errors.IntegrityError:
-			self.cursor.execute(f"SELECT count FROM shopping_cart WHERE ISBN='{isbn}'")
-			count = self.cursor.fetchone()[0]
-			self.cursor.execute(f"UPDATE shopping_cart SET count={count + 1} WHERE ISBN='{isbn}'")
+		except mysql.connector.errors.IntegrityError as e:
+			if e.errno == 1452:
+				log.fatal(f"Book [{isbn}] doesn't exist.")
+				return False
+			else:
+				self.cursor.execute(f"SELECT count FROM shopping_cart WHERE ISBN='{isbn}'")
+				count = self.cursor.fetchone()[0]
+				self.cursor.execute(f"UPDATE shopping_cart SET count={count + 1} WHERE ISBN='{isbn}'")
 		finally:
 			self.db.commit()
+			return True
 
-	def update_shopping_cart(self, isbn, count, change_time):
+	def update_shopping_cart(self, isbn, count):
 		if int(count) == 0:
 			self.cursor.execute(f"DELETE FROM shopping_cart WHERE ISBN='{isbn}'")
 			self.db.commit()
+			return True
 		elif int(count) > 0:
-			self.cursor.execute(f"UPDATE shopping_cart SET count={count}, time={change_time} WHERE ISBN='{isbn}'")
+			self.cursor.execute(f"UPDATE shopping_cart SET count={count} WHERE ISBN='{isbn}'")
 			self.db.commit()
+			return True
 		else:
 			log.fatal(f"Update shopping_cart for user [{self.user_id}: {self.user_name}] failed, get count={count}")
+			return False
 
 	def get_shopping_cart(self):
 		self.cursor.execute(f"SELECT * FROM shopping_cart ORDER BY time DESC")
 		result = self.cursor.fetchall()
 		return result
+
+	def purchase(self, isbn, purchase_time, count):
+		"""
+		Add this record to book_e_shop.shopping_history
+		:param isbn:
+		:param purchase_time:
+		:param count:
+		:return: True | False
+		"""
+		try:
+			self.cursor.execute(f"INSERT INTO purchase_history(ISBN, time, count) VALUES ({isbn}, {purchase_time}, {count})")
+			e_shop_cursor.execute(f"INSERT INTO shopping_history(isbn, count, time) VALUES({isbn}, {count}, {purchase_time})")
+			self.db.commit()
+			return True
+		except mysql.connector.errors.IntegrityError:
+			log.fatal(f"Book [{isbn}] not exist")
+			return False
 
 
 class Admin(EShopUser):
@@ -189,8 +219,7 @@ class Admin(EShopUser):
 			log.warn(f"Get table {tables}, should get table: change_history")
 			log.info(f"Recreating table: change_history")
 			self.recreate_table()
-
-	# end check
+		# end check
 
 	def recreate_table(self):
 		self.delete_tables()

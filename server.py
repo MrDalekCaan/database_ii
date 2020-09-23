@@ -6,7 +6,7 @@ from flask import Flask, render_template, request, redirect, make_response, send
 import time
 import datetime
 import json
-from Constants import LIFE_TIME
+from Constants import LIFE_TIME, FAIL, OK
 # from untitled import books
 import backend as B
 import log
@@ -180,11 +180,11 @@ def get_books():
 	count = int(request.args.get('count'))
 	low = request.args.get('low')
 	high = request.args.get('high')
-	if low == '':
+	if low == '' or low == "null":
 		low = None
 	else:
 		low = int(low)
-	if high == '':
+	if high == '' or high == "null":
 		high = None
 	else:
 		high = int(high)
@@ -224,7 +224,7 @@ def get_book_info():
 	isbn = request.args.get("isbn")
 	book = B.get_book_by_isbn(isbn)
 	if user_id:
-		B.history(user_id, isbn, '{0:%Y%m%d%H%M%S}'.format(datetime.datetime.now()))
+		B.add_history_record(user_id, isbn, '{0:%Y%m%d%H%M%S}'.format(datetime.datetime.now()))
 	resp = make_response(render_template(book_infopg, **book))
 	update_login(resp)
 	return resp
@@ -347,13 +347,17 @@ def changenum():
 	# return json.dumps(content)
 	return "OK"
 
-	@app.route("/purchase")
-	def purchase():
-		user_id = get_user_id()
-		if !user_id:
-			return 
-		isbn = request.args.get('isbn')
 
+@app.route("/purchase")
+def purchase():
+	user_id = get_user_id()
+	if not user_id:
+		return FAIL
+	isbn = request.args.get('isbn')
+	count = request.args.get('count')
+	if B.purchase(user_id, isbn, count):
+		return OK
+	return FAIL
 
 
 # static file

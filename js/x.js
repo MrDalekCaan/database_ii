@@ -3,14 +3,14 @@ var app = new Vue({
 	data: {
 		books: [],
 		selected: [0, 0],
-		low: null,
-		high:null,
+		low: "",
+		high:"",
 		filter: false,
 		pageSize: null,
 		titles:{},
 		lastValue: {
-			"low": null,
-			"high": null
+			"low": "",
+			"high": ""
 		}
 	},
 	methods: {
@@ -27,7 +27,7 @@ var app = new Vue({
 		 	var high = parseFloat(this.high)
 		 	var low = parseFloat(this.low)
 
-		 	high = high < 0 ? 0 : highl
+		 	high = high < 0 ? 0 : high
 		 	low = low < 0 ? 0 : low
 
 		 	this.high = high
@@ -83,8 +83,6 @@ var app = new Vue({
 			return this.titles[this.selected[0]].subcat[this.selected[1]];
 		},
 		startFilter: function (){
-			if (this.filter)
-				return
 			this.filter = true
 			this.updatePage()
 		},
@@ -92,8 +90,8 @@ var app = new Vue({
 			if (!this.filter)
 				return
 			this.filter = false
-			this.low = null;
-			this.high = null;
+			this.low = "";
+			this.high = "";
 			this.updatePage()
 		},
 		updatePage: function () {
@@ -101,6 +99,7 @@ var app = new Vue({
 		}
 	},	
 	created() {
+	    // get category
 		let xhttp = new XMLHttpRequest()
 		xhttp.open("GET", "cats", false)
 		xhttp.send()
@@ -136,27 +135,23 @@ function xmlRequest(subcat, from=0, count=30, low='', high='') {
 }
 
 (async function(){
-	var ele = document.getElementById('aspace2')
+	const ele = document.getElementById('aspace2');
 	if (ele == null)
 		return;
-
-	var pageSize = 0
-
+	let pageSize = 0;
 	while (ele.clientHeight == ele.scrollHeight) {
 		pageSize += 3
-		// app.books.push(...xmlRequest('xxx', 0, 3))
 		app.books.push(...xmlRequest(app.curTitle(), app.books.length, 3))
 		await new Promise(r => setTimeout(r, 100));
 	}
 	app.pageSize = pageSize
 })();
 
-var obj;
 
 function quit() {
-	var username = getCookie('username')
-	if (username) {
-		setCookie("username", username, 0)
+	const user_id = getCookie('user_id');
+	if (user_id) {
+		setCookie("user_id", user_id, 0)
 		window.location.reload()
 	}
 }

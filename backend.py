@@ -118,10 +118,10 @@ def update_user_cart(user_id, operation, isbn, count=None):
 		log.info(f"user {user_id} add book {isbn} to shopping cart")
 	elif operation == 1:
 		log.info(f"user {user_id} update book {isbn} to {count}")
-		user.update_shopping_cart(isbn, count, now)
+		user.update_shopping_cart(isbn, count)
 
 
-def history(user_id, isbn, visit_time) -> bool:
+def add_history_record(user_id, isbn, visit_time) -> bool:
 	"""
 	add history record
 	:param user_id:
@@ -188,18 +188,21 @@ def get_book_by_isbn(isbn):
 
 
 def get_visit_history(user_id):
-	# try:
-	# 	user = user_cache[user_id]
-	# except KeyError:
-	# 	user = eu.get_user(user_id)
 	user = _get_user(user_id)
 	contents = user.get_history_record()
 	t = read_columns(user.cursor, "browser_history")
-	return [{t[i]: c for i, c in enumerate(content)} for content in contents]
+	li = [{t[i]: c for i, c in enumerate(content)} for content in contents]
+	return [date_time_toString('time', content) for content in li]
+
+
+def purchase(user_id, isbn, count):
+	user = _get_user(user_id)
+	purchase_time = '{0:%Y%m%d%H%M%S}'.format(datetime.datetime.now())
+	return user.purchase(isbn, purchase_time, count)
 
 
 def date_time_toString(property_name, book_info):
-	book_info[property_name] = book_info[property_name].strftime("%Y-%m-%d")
+	book_info[property_name] = book_info[property_name].strftime("%Y-%m-%d %H:%M:%S")
 	return book_info
 
 

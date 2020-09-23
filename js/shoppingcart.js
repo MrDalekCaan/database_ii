@@ -38,7 +38,7 @@ var app = new Vue({
 		update: function(index) {
 			var cart = xmlRequest()
 			if (cart.length > index) {
-				this.$set(this.books, index, cart[0])
+				this.$set(this.books, index, cart[index])
 			}
 		},
 		updateAll: function() {
@@ -52,8 +52,18 @@ var app = new Vue({
 		},
 		buyThisOne: function(index) {
 			const isbn = this.books[index].ISBN
+			const count = this.books[index].count
 			let xhttp = new XMLHttpRequest()
-			xhttp.open("GET", ``)
+			xhttp.open("GET", `purchase?isbn=${isbn}&count=${count}`, false)
+            xhttp.send()
+			const obj = JSON.parse(xhttp.responseText)
+			if (obj.state){
+				this.del(index)
+				alert("purchase success")
+			}
+			else {
+				alert("purchase failed")
+			}
 		}
 	},
 	created() {

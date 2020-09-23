@@ -28,27 +28,13 @@ var app = new Vue({
 	created() {
 		var xhttp = new XMLHttpRequest()
 		xhttp.open("GET", "history", false)
+        xhttp.send()
 		var obj = JSON.parse(xhttp.responseText)
 		this.books = obj.content
 	},
 		
 });
 
-function changeCartContent(id, num) {
-	var xhttp = new XMLHttpRequest()
-	xhttp.open('GET', `shoppingcart/changenum?id=${id}&num=${num}`)
-	xhttp.send()
-}
-
-// change if there is a book
-//create new book if there is  no book
-function sendChangeReq(oldid, newid, bookname, author, price, imgurl) {
-	var xhttp = new XMLHttpRequest()
-	xhttp.open("POST", 'manage/change', false)
-	xhttp.send(`oldid=${oldid}&newid=${newid}&bookname=${bookname}&author=${author}&price=${price}&imgurl=${imgurl}`)
-	var obj = JSON.parse(xhttp.responseText)
-	return obj.content
-}
 
 function xmlRequest() {
 	var xhttp = new XMLHttpRequest()
