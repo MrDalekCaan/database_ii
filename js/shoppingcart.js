@@ -1,3 +1,4 @@
+var changingCartContent = false
 var app = new Vue({
 	el: '#aspace2',
 	data: {
@@ -6,8 +7,8 @@ var app = new Vue({
 	},
 	computed:{
 		totalPrice: function () {
-			var total = 0;
-			for (var i = 0; i < this.books.length; i++) {
+			let total = 0;
+			for (let i = 0; i < this.books.length; i++) {
 				total += parseFloat(this.books[i].price) * parseFloat(this.books[i].count);
 			}
 			return total;
@@ -64,19 +65,32 @@ var app = new Vue({
 			else {
 				alert("purchase failed")
 			}
+		},
+
+		changeCartContent: function (isbn, num, callback) {
+		    const self = this
+			if (changingCartContent) return
+			else {
+				changingCartContent = true
+			}
+			const xhttp = new XMLHttpRequest();
+			xhttp.open('GET', `shoppingcart/change?isbn=${isbn}&num=${num}`)
+			xhttp.onreadystatechange = function () {
+				if (this.readyState == 4 && this.status == 200) {
+					changingCartContent = false
+					callback()
+					// TODO:xxx
+				}
+			}
+			xhttp.send()
 		}
 	},
 	created() {
 		this.updateAll()
 	},
-		
+
 });
 
-function changeCartContent(isbn, num) {
-	const xhttp = new XMLHttpRequest();
-	xhttp.open('GET', `shoppingcart/change?isbn=${isbn}&num=${num}`, false)
-	xhttp.send()
-}
 
 // change if there is a book
 //create new book if there is  no book

@@ -27,7 +27,7 @@
 
 			<div id="aspace2" class="container" >
 				<div>{{ totalPrice }}</div>
-				<div v-for="(book, index) in books" :key="book.ISBN">
+				<div v-for="(book, index) in books" >
 					<img :src="book.img_url">
 					<span>{{ book.bookname }}</span>
 					<span>{{ book.ISBN }}</span>

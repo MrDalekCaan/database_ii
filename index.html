@@ -16,47 +16,60 @@
 				<a href="#" style="display: [[ display ]]" onclick="quit(); return false;">退出登陆</a>
 			</div>
 		</div>
-		
-		
 
-			<div id="aspace1">
-				<div class="filterComponent">
-					<p style="font-size: 13px;">筛选</p>
-					<input type="number" placeholder="最低价" v-model="low" id="low" @change="boundChange">
-					<input type="number" placeholder="最高价" v-model="high" id="high" @change="boundChange">
-					<button @click="startFilter">确定</button>
-					<button @click="cancleFilter">取消</button>
-				</div>
-				<div class="headpic">
-					<img src="img/headpic.jpg">
-				</div>
-				
-				<div class="jieshao">
-					<p><font size="3">十年老店</font></p>
-					<p><font size="3">皇冠品质</font></p>
-				</div>
-				
-				<div class="daogou" id="daogou1">
-					<ul class="daogoulist">
-						<li>页面向导</li>
+		<span>search book name</span><input v-on:keyup.enter="fuzzy_search_on" v-model="key_word" type="text" id="search_book_name"/>
+		<button @click="fuzzy_search_on">start</button>
+		<button @click="fuzzy_search_off">off</button>
 
-							<li v-for='(obj, x) in titles'>
-								<span style="color: aliceblue">{{ obj.cat }}</span>
-								<ul>
-									<li v-for='(t, y) in obj.subcat' 
-									:id="'title-' + x + '-' + y" 
-									:class="{ selectedcat: x == selected[0] && y == selected[1] }"
-									@click="chosecat">
-										<span>{{ t }}</span>
-									</li>
-								</ul>
-							</li>
-						<!-- </template> -->
+		<ul id="order_by" @click="set_order">
+			<li><div id="time_asc">时间升序</div></li>
+			<li><div id="time_desc">时间降序</div></li>
+			<li>
+				<div id="sold_asc">销量升序</div>
+			</li>
+			<li>
+				<div id="sold_desc">销量降序</div>
+			</li>
+		</ul>
 
-						
-					</ul>
-				</div>
-			</div>
+		<div id="aspace1">
+				 <div class="filterComponent">
+				 <p style="font-size: 13px;">筛选</p>
+				 <input type="number" placeholder="最低价" v-model="low" id="low" @change="boundChange">
+				 <input type="number" placeholder="最高价" v-model="high" id="high" @change="boundChange">
+				 <button @click="startFilter">确定</button>
+				 <button @click="cancleFilter">取消</button>
+				 </div>
+					 <div class="headpic">
+					 <img src="img/headpic.jpg">
+				 </div>
+
+				 <div class="jieshao">
+					 <p><font size="3">十年老店</font></p>
+					 <p><font size="3">皇冠品质</font></p>
+				 </div>
+
+					 <div class="daogou" id="daogou1">
+					 <ul class="daogoulist">
+					 <li>页面向导</li>
+
+					 <li v-for='(obj, x) in titles'>
+					 <span style="color: aliceblue">{{ obj.cat }}</span>
+					 <ul>
+					 <li v-for='(t, y) in obj.subcat'
+					 :id="'title-' + x + '-' + y"
+					 :class="{ selectedcat: x == selected[0] && y == selected[1] }"
+					 @click="chosecat">
+					 <span>{{ t }}</span>
+					 </li>
+					 </ul>
+					 </li>
+					 <!-- </template> -->
+
+
+					 </ul>
+					 </div>
+					 </div>
 		
 			<div id="aspace2" v-on:scroll="scroll">
 				<a v-for="(book, v) in books" :id="'book-' + v " :key="book.id" :href="'/book_info?isbn=' + book.ISBN">
@@ -72,8 +85,8 @@
 		</div>
 
 		<!-- <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script> -->
+</div>
 		<script src="js/vue.js"></script>
 		<script src="js/x.js"></script>
-</div>
 	</body>
 </html>

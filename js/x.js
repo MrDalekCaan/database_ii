@@ -5,15 +5,26 @@ var app = new Vue({
 		selected: [0, 0],
 		low: "",
 		high:"",
+		key_word:'',
 		filter: false,
+		fuzzy_mode: false,
 		pageSize: null,
 		titles:{},
+		order:'time_desc',
 		lastValue: {
 			"low": "",
 			"high": ""
 		}
 	},
 	methods: {
+		fuzzy_search_on: function() {
+			this.fuzzy_mode = true
+            this.books = this.get_books_by(0, this.pageSize)
+		},
+		fuzzy_search_off: function (){
+			this.fuzzy_mode = false
+			this.books = this.get_books_by(0, this.pageSize)
+		},
 		boundChange: function(e){
 			console.log('changed')
 			this.lastValue.low = this.low
@@ -41,14 +52,12 @@ var app = new Vue({
 
 		},
 		chosecat: function(e) {
-			var howMuchBookDoYouWant = 9
-			obj = e;
-			var target = e.target;
+		    // set current subcat
+			let target = e.target;
 			if (target.tagName == 'SPAN') {
 				target = target.parentNode
-				// console.log("id: " + target.id)
 			}
-			var tempsplit = target.id.split('-')
+			const tempsplit = target.id.split('-');
 
 			if (this.selected[0] == tempsplit[1] && this.selected[1] == tempsplit[2])
 				return 					// no need to change anything
@@ -58,25 +67,21 @@ var app = new Vue({
 				this.$set(this.selected, 1, tempsplit[2])
 			}
 
-			var cat = this.curTitle()
-			var newbooks = xmlRequest(cat, 0, howMuchBookDoYouWant)
+			const newbooks = this.get_books_by(0, this.pageSize);
 			this.books = newbooks
 		},
 		scroll: function (e) {
-
-			ele = e.target
-			var maxScrolltop = ele.scrollHeight - ele.clientHeight
+			let ele = e.target
+			const maxScrolltop = ele.scrollHeight - ele.clientHeight;
 			if (maxScrolltop - ele.scrollTop >= 10)
 				return
 
-			// reach the end
-			// other_books = xmlRequest('xxx', 0, 9)
 			let other_books;
-			if (!this.filter) {
-				other_books = xmlRequest(this.curTitle(), this.books.length, this.pageSize)
-			} else {
-				other_books = xmlRequest(this.curTitle(), this.books.length, this.pageSize, this.low, this.high)
-			}
+			// if (!this.filter) {
+				other_books = this.get_books_by(this.books.length, this.pageSize)
+			// } else {
+				other_books = this.get_books_by(this.books.length, this.pageSize)
+			// }
 			this.books.push(...other_books)
 		},
 		curTitle: function() {
@@ -95,9 +100,38 @@ var app = new Vue({
 			this.updatePage()
 		},
 		updatePage: function () {
-			this.books = xmlRequest(this.curTitle(), 0, this.pageSize, this.low, this.high)
+			this.books = this.get_books_by( 0, this.pageSize)
+		},
+		 get_books_by: function(from=0, count=30) {
+			const xhttp = new XMLHttpRequest();
+			let request_parameters = `books?subcat=${this.curTitle()}&from=${from}&count=${count}&orderby=${this.order}`
+			 if (this.filter) {
+			 	request_parameters += `&low=${this.low}&high=${this.high}`
+			 }
+			 if (this.fuzzy_mode) {
+			 	request_parameters += `&key_word=%${this.key_word}%`
+			 }
+			xhttp.open("GET", request_parameters, false)
+			xhttp.send()
+			let obj;
+			try {
+				obj = JSON.parse(xhttp.responseText)
+			} catch(e) {
+				console.log("xml json parse error")
+				return [];
+			}
+			return obj.content
+		},
+		update: function(){
+			this.books = this.get_books_by(0, this.pageSize)
+		},
+		set_order: function(event) {
+			if (this.order != event.target.id) {
+				this.order = event.target.id
+				this.update()
+			}
 		}
-	},	
+	},
 	created() {
 	    // get category
 		let xhttp = new XMLHttpRequest()
@@ -118,21 +152,6 @@ var app = new Vue({
 	}
 });
 
-function xmlRequest(subcat, from=0, count=30, low='', high='') {
-	const xhttp = new XMLHttpRequest();
-	xhttp.open("GET", `books?subcat=${subcat}&from=${from}&count=${count}&low=${low}&high=${high}`, false)
-	xhttp.send()
-	let obj;
-	try {
-		obj = JSON.parse(xhttp.responseText)
-	} catch(e) {
-		console.log("xml json parse error")
-		return [];
-	}
-
-	return obj.content
-
-}
 
 (async function(){
 	const ele = document.getElementById('aspace2');
@@ -141,7 +160,7 @@ function xmlRequest(subcat, from=0, count=30, low='', high='') {
 	let pageSize = 0;
 	while (ele.clientHeight == ele.scrollHeight) {
 		pageSize += 3
-		app.books.push(...xmlRequest(app.curTitle(), app.books.length, 3))
+		app.books.push(...app.get_books_by(app.books.length, 3))
 		await new Promise(r => setTimeout(r, 100));
 	}
 	app.pageSize = pageSize

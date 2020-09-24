@@ -128,6 +128,7 @@ def build_book_e_shop():
 	paper_count VARCHAR(10),
 	zhuangzhen VARCHAR(10),
 	publisher VARCHAR(400),
+	sold_count INT DEFAULT 0,
 	cat VARCHAR(10),
 	sub VARCHAR(10)
 	"""

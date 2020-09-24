@@ -56,27 +56,29 @@ def _get_cats():
 	return _category
 
 
-def get_books(f, count, price_region=None, subcat=None):
+def get_books(f, count, price_region=None, subcat=None, key_word=None, order=None):
 	"""
+	:param key_word: use for fuzzy search
 	:param f: from type int
 	:param count: type int
 	:param price_region: [low, high], [None, high], [low, None] default None
 	:param subcat: subcat in database default None
 	:return:list[books] satisfy requirement
 	"""
+	switch = {'time_desc': ("publish_time", "DESC"),
+			  		'time_asc': ("publish_time", "ASC"),
+			  		'sold_asc': ("sold_count", 'ASC'),
+			  		'sold_desc': ("sold_count", 'DESC')}
+	(order_property, order_way) = switch[order]
 	constrain = Constrain()
-	constrain.apply_constraint_value("sub", subcat).apply_constraint_region("price", price_region)
+	constrain.apply_constraint_value("sub", subcat).apply_constraint_region("price", price_region).\
+		like("book_name", key_word).order_by(order_property, order_way).from_(f).limit(count)
+	log.info(constrain)
 	cursor.execute(f"SELECT * FROM book_info WHERE {constrain}")
 	contents = cursor.fetchall()
 	t = read_columns(cursor, "book_info")
-
 	li = [{t[i]: c for i, c in enumerate(content)} for content in contents]
-	end = min(len(li), f + count)
-	result = li[f:end]
-	for content in result:
-		if type(content["publish_time"]) == datetime.date:
-			content["publish_time"] = content["publish_time"].strftime("%Y-%m-%d")
-	return li[f: end]
+	return [date_time_toString("publish_time", content) for content in li]
 
 
 def get_user_cart(user_id):

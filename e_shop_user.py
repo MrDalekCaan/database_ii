@@ -185,6 +185,7 @@ class Customer(EShopUser):
 	def purchase(self, isbn, purchase_time, count):
 		"""
 		Add this record to book_e_shop.shopping_history
+		Add count to book_info.sold_count
 		:param isbn:
 		:param purchase_time:
 		:param count:
@@ -193,7 +194,9 @@ class Customer(EShopUser):
 		try:
 			self.cursor.execute(f"INSERT INTO purchase_history(ISBN, time, count) VALUES ({isbn}, {purchase_time}, {count})")
 			e_shop_cursor.execute(f"INSERT INTO shopping_history(isbn, count, time) VALUES({isbn}, {count}, {purchase_time})")
+			e_shop_cursor.execute(f"UPDATE book_info SET sold_count=sold_count+{count} WHERE ISBN=isbn")
 			self.db.commit()
+			book_e_shop.commit()
 			return True
 		except mysql.connector.errors.IntegrityError:
 			log.fatal(f"Book [{isbn}] not exist")

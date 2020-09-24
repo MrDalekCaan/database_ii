@@ -178,28 +178,14 @@ def get_books():
 	subcat = request.args.get('subcat')
 	f = int(request.args.get('from'))
 	count = int(request.args.get('count'))
-	low = request.args.get('low')
-	high = request.args.get('high')
-	if low == '' or low == "null":
-		low = None
-	else:
-		low = int(low)
-	if high == '' or high == "null":
-		high = None
-	else:
-		high = int(high)
-	bks = B.get_books(f, count, price_region=[low, high], subcat=subcat)
+	low = null_parameter(request.args.get('low'))
+	high = null_parameter(request.args.get('high'))
+	key_word = null_parameter(request.args.get('key_word'))
+	order = request.args.get('orderby')
+	bks = B.get_books(f, count, price_region=[low, high], subcat=subcat, key_word=key_word, order=order)
 	bks = {"content": bks}
 	return json.dumps(bks)
 
-
-# return '''
-# {
-# 	"content":[{"name":"幼儿绘本", "price":"¥29.70", "image":"http://img3m4.ddimg.cn/58/18/1179371614-1_b_14.jpg", "author":""},
-# 	 {"name":"全5册早教书籍", "price":"¥29.80", "image":"http://img3m4.ddimg.cn/37/3/1202388004-1_b_2.jpg", "author":""},
-# 	 {"name":"幼儿绘本", "price":"¥29.70", "image":"http://img3m4.ddimg.cn/58/18/1179371614-1_b_14.jpg", "author":""}]
-# }
-# '''
 
 @app.route('/book')
 def getbook():
@@ -405,6 +391,10 @@ class httphander(BaseHTTPRequestHandler):
 
 
 # def do_POST
+
+
+def null_parameter(value):
+	return None if value == '' or value is None or value.lower() == 'null' else value
 
 
 if __name__ == "__main__":
