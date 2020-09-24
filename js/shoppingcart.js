@@ -19,57 +19,77 @@ var app = new Vue({
 			return this.titles[this.selected[0]].titles[this.selected[1]];
 		},
 		addone: function (index) {
-			const isbn = this.books[index].ISBN;
-			const obj = this.books[index];
-			obj.count = parseInt(obj.count) + 1
-			changeCartContent(isbn, obj.count)
-			this.update(index)
+			const self = this
+			const isbn = self.books[index].ISBN;
+			const obj = self.books[index];
+			let count = parseInt(obj.count) + 1
+			changeCartContent(isbn, count, function() {
+				self.update(index)
+			})
 		},
 		subone:function (index) {
-			var isbn = this.books[index].ISBN
-			var obj = this.books[index]
-			obj.count = obj.count - 1
-			if (obj.count <= 0) {
-				obj.count = obj.count + 1
+			const self = this
+			var isbn = self.books[index].ISBN
+			var obj = self.books[index]
+			let count = parseInt(obj.count) - 1
+			if (count <= 0) {
 				return
 			}
-			changeCartContent(isbn, obj.count)
-			this.update(index)
+			changeCartContent(isbn, count, function () {
+				self.update(index)
+			})
 		},
 		update: function(index) {
-			var cart = xmlRequest()
-			if (cart.length > index) {
-				this.$set(this.books, index, cart[index])
-			}
+			const self = this
+			xmlRequest(cart => {
+				if (cart.length > index) {
+					self.$set(self.books, index, cart[index])
+				}
+			})
 		},
 		updateAll: function() {
-			var cart = xmlRequest()
-			this.books = cart
+			const self = this
+			xmlRequest(cart => {
+				self.books = cart
+			})
 		},
 		del: function (index) {
 			var isbn = this.books[index].ISBN
-			 changeCartContent(isbn, 0)
-			 this.updateAll()
+			 changeCartContent(isbn, 0, function() {
+			 	this.updateAll()
+			 })
 		},
 		buyThisOne: function(index) {
+			if (changingCartContent) {
+				alert("您操作的太快了")
+			} else {
+				changingCartContent = true
+			}
 			const isbn = this.books[index].ISBN
 			const count = this.books[index].count
 			let xhttp = new XMLHttpRequest()
-			xhttp.open("GET", `purchase?isbn=${isbn}&count=${count}`, false)
+			xhttp.open("GET", `purchase?isbn=${isbn}&count=${count}`)
+			xhttp.onreadystatechange = function () {
+				if (this.readyState == 4 && this.status == 200) {
+					const obj = JSON.parse(this.responseText)
+					if (obj.state){
+						this.del(index)
+						alert("purchase success")
+					}
+					else {
+						alert("purchase failed")
+					}
+				}
+			}
             xhttp.send()
-			const obj = JSON.parse(xhttp.responseText)
-			if (obj.state){
-				this.del(index)
-				alert("purchase success")
-			}
-			else {
-				alert("purchase failed")
-			}
 		},
 
 		changeCartContent: function (isbn, num, callback) {
 		    const self = this
-			if (changingCartContent) return
+			if (changingCartContent) {
+				alert("您操作的太快了")
+				return
+			}
 			else {
 				changingCartContent = true
 			}
@@ -79,7 +99,6 @@ var app = new Vue({
 				if (this.readyState == 4 && this.status == 200) {
 					changingCartContent = false
 					callback()
-					// TODO:xxx
 				}
 			}
 			xhttp.send()
@@ -102,20 +121,22 @@ function sendChangeReq(oldid, newid, bookname, author, price, imgurl) {
 	return obj.content
 }
 
-function xmlRequest() {
+function xmlRequest(callback) {
 	var xhttp = new XMLHttpRequest()
-	xhttp.open("GET", "shoppingcart", false)
-	xhttp.send()
-	var obj;
-	try {
-		obj = JSON.parse(xhttp.responseText)
-	} catch(e) {
-		console.log("xml json parse error")
-		return [];
+	xhttp.open("GET", "shoppingcart")
+	xhttp.onreadystatechange = function() {
+		if (this.readyState == 4 && this.status == 200) {
+			var obj;
+			try {
+				obj = JSON.parse(xhttp.responseText)
+			} catch(e) {
+				console.log("xml json parse error")
+				return [];
+			}
+			callback(obj.content)
+		}
 	}
-
-	return obj.content
-
+	xhttp.send()
 }
 
 
