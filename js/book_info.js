@@ -1,3 +1,4 @@
+var addingToCart = false
 var app = new Vue({
 	el: "#root",
 	data: {
@@ -5,9 +6,18 @@ var app = new Vue({
 	},
 	methods:{
 		addToCart: function () {
+			if (addingToCart) return
+			else {
+				alert("too quick, please wait")
+				addingToCart = true
+			}
 			if (hasUser()) {
 				const xhttp = new XMLHttpRequest();
 				xhttp.open("GET", `/addToCart?isbn=${this.isbn}`)
+				xhttp.onreadystatechange = () => {
+					addingToCart = false	
+					alert("add to cart successfully")
+				}
 				xhttp.send()
 			} else {
 				window.location.href = "/loginpg"

@@ -1,3 +1,4 @@
+var gettingBooks = false
 var app = new Vue({
 	el: '#app',
 	data: {
@@ -102,7 +103,15 @@ var app = new Vue({
 		updatePage: function () {
 			this.books = this.get_books_by( 0, this.pageSize)
 		},
-		 get_books_by: function(from=0, count=30) {
+		 get_books_by: function(from=0, count=30, callback) {
+		 	/*
+			callback have parameter of books get from server
+		 	*/	
+			if (gettingBooks) {
+				return
+			} else {
+				gettingBooks = true
+			}
 			const xhttp = new XMLHttpRequest();
 			let request_parameters = `books?subcat=${this.curTitle()}&from=${from}&count=${count}&orderby=${this.order}`
 			 if (this.filter) {
@@ -111,19 +120,32 @@ var app = new Vue({
 			 if (this.fuzzy_mode) {
 			 	request_parameters += `&key_word=%${this.key_word}%`
 			 }
-			xhttp.open("GET", request_parameters, false)
-			xhttp.send()
-			let obj;
-			try {
-				obj = JSON.parse(xhttp.responseText)
-			} catch(e) {
-				console.log("xml json parse error")
-				return [];
+			xhttp.open("GET", request_parameters)
+			xhttp.onreadystatechange = () => {
+				if (this.readyState == 4 && this.status == 200) {
+					gettingBooks = false	
+					let obj
+					try {
+						obj = JSON.parse(xhttp.responseText)
+						callback(obj.content)
+					} catch (e) {
+						console.error("xml json parse error")	
+					}
+					gettingBooks = false
+				}
+				else if (this.status >= 400) {
+					console.error("get books failed")
+					gettingBooks = false
+				}
 			}
-			return obj.content
+			xhttp.send()
 		},
 		update: function(){
 			this.books = this.get_books_by(0, this.pageSize)
+			const self = this
+			self.get_books_by(0, self.pageSize, books => {
+				self.books = books
+			})
 		},
 		set_order: function(event) {
 			if (this.order != event.target.id) {
@@ -134,21 +156,24 @@ var app = new Vue({
 	},
 	created() {
 	    // get category
+	    let self = this
 		let xhttp = new XMLHttpRequest()
-		xhttp.open("GET", "cats", false)
-		xhttp.send()
-		let resp
-		try{
-			resp = JSON.parse(xhttp.responseText)
-			let result = []
-			for (const cat in resp) {
-				let obj = {"subcat": resp[cat], "cat": cat}
-				result.push(obj)
+		xhttp.open("GET", "cats")
+		xhttp.onreadystatechange = () => {
+			let resp
+			try{
+				resp = JSON.parse(this.responseText)
+				let result = []
+				for (const cat in resp) {
+					let obj = {"subcat": resp[cat], "cat": cat}
+					result.push(obj)
+				}
+	            self.titles = result
+			} catch (e) {
+				console.log("cats json parse error")
 			}
-            this.titles = result
-		} catch (e) {
-			console.log("cats json parse error")
 		}
+		xhttp.send()
 	}
 });
 

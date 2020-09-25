@@ -265,8 +265,9 @@ def manageDelete():
 def add_to_cart():
 	user_id = get_user_id()
 	isbn = request.args.get("isbn")
-	B.update_user_cart(user_id, 0, isbn, 1)
-	return '0'
+	if B.update_user_cart(user_id, 0, isbn, 1):
+		return OK
+	return FAIL
 
 
 @app.route("/shoppingcartpg")
@@ -304,12 +305,6 @@ def shoppingcart():
 	user_id = get_user_id()
 	if not user_id:
 		return redirect("/loginpg")
-
-	# res = b.userbooklist(username)
-	# res = [{'bookname': "nnnnnn",
-	# 		'count': "222",
-	# 		'id': "ppppp",
-	# 		'imgurl': "http://img3m3.ddimg.cn/51/25/23977653-1_b_12.jpg"}]
 	res = B.get_user_cart(user_id)
 	res = {"content": res}
 	resp = make_response(json.dumps(res))

@@ -157,6 +157,7 @@ class Customer(EShopUser):
 				log.fatal(f"Book [{isbn}] doesn't exist.")
 				return False
 			else:
+				# TODO: too complex
 				self.cursor.execute(f"SELECT count FROM shopping_cart WHERE ISBN='{isbn}'")
 				count = self.cursor.fetchone()[0]
 				self.cursor.execute(f"UPDATE shopping_cart SET count={count + 1} WHERE ISBN='{isbn}'")

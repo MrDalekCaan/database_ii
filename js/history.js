@@ -1,3 +1,4 @@
+val gettingShoppingCart = false
 var app = new Vue({
 	el: '#aspace2',
 	data: {
@@ -9,10 +10,12 @@ var app = new Vue({
 			return this.titles[this.selected[0]].titles[this.selected[1]];
 		},
 		update: function(index) {
-			var cart = xmlRequest()
-			if (cart.length > index) {
-				this.$set(this.books, index, cart[index])
-			}
+			const self = this
+			var cart = xmlRequest( ()=> {
+				if (cart.length > index) {
+					self.$set(self.books, index, cart[index])
+				}
+			})
 		},
 		updateAll: function() {
 			var cart = xmlRequest()
@@ -35,21 +38,31 @@ var app = new Vue({
 		
 });
 
-
-function xmlRequest() {
+// TODO: refact this function name
+function xmlRequest(callback) {
+	if (gettingShoppingCart) {
+		return
+	}
+	else {
+		gettingShoppingCart = false
+	}
 	var xhttp = new XMLHttpRequest()
 	xhttp.open("GET", "shoppingcart", false)
-	xhttp.send()
-	var obj;
-	try {
-		obj = JSON.parse(xhttp.responseText)
-	} catch(e) {
-		console.log("xml json parse error")
-		return [];
+	xhttp.onreadystatechange = () => {
+		if (this.readyState == 4 && this.status == 200) {
+			var obj;
+			try {
+				obj = JSON.parse(xhttp.responseText)
+				callback(obj.content)
+			} catch(e) {
+				console.error("xml json parse error")
+			}
+			gettingShoppingCart = false
+		} else if (this.status >= 400) {
+			gettingShoppingCart = false
+		}	
 	}
-
-	return obj.content
-
+	xhttp.send()
 }
 
 

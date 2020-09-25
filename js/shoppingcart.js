@@ -24,7 +24,8 @@ var app = new Vue({
 			const obj = self.books[index];
 			let count = parseInt(obj.count) + 1
 			changeCartContent(isbn, count, function() {
-				self.update(index)
+				// self.update(index)
+				self.updateAll()
 			})
 		},
 		subone:function (index) {
@@ -36,7 +37,8 @@ var app = new Vue({
 				return
 			}
 			changeCartContent(isbn, count, function () {
-				self.update(index)
+				// self.update(index)
+				self.updateAll()
 			})
 		},
 		update: function(index) {
@@ -99,6 +101,10 @@ var app = new Vue({
 				if (this.readyState == 4 && this.status == 200) {
 					changingCartContent = false
 					callback()
+				}
+				else if (this.status >= 400) {
+					console.log("change cart content failed")
+					changingCartContent = false
 				}
 			}
 			xhttp.send()

@@ -116,11 +116,17 @@ def update_user_cart(user_id, operation, isbn, count=None):
 	now = '{0:%Y%m%d%H%M%S}'.format(datetime.datetime.now())
 	user: eu.Customer = user_cache[user_id]
 	if operation == 0:
-		user.add_shopping_cart(isbn, now)
-		log.info(f"user {user_id} add book {isbn} to shopping cart")
+		if user.add_shopping_cart(isbn, now):
+			log.info(f"user {user_id} add book {isbn} to shopping cart")
+			return True
+		log.fatal(f"user {user_id} add book {isbn} to shopping cart failed")
+		return False
 	elif operation == 1:
-		log.info(f"user {user_id} update book {isbn} to {count}")
-		user.update_shopping_cart(isbn, count)
+		if user.update_shopping_cart(isbn, count):
+			log.info(f"user {user_id} update book {isbn} to {count}")
+			return True
+		log.fatal(f"user {user_id} update book {isbn} to {count} failed")
+		return False
 
 
 def add_history_record(user_id, isbn, visit_time) -> bool:
