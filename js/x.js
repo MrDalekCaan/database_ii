@@ -81,13 +81,6 @@ var app = new Vue({
 			if (maxScrolltop - ele.scrollTop >= 10)
 				return
 
-			// let other_books;
-			// if (!this.filter) {
-			// 	other_books = this.get_books_by(this.books.length, this.pageSize)
-			// } else {
-			// 	other_books = this.get_books_by(this.books.length, this.pageSize)
-			// }
-			// this.books.push(...other_books)
 			const self = this
             this.get_books_by(this.books.length, this.pageSize, books => {
             	self.books.push(...books)
@@ -141,6 +134,7 @@ var app = new Vue({
 					}
 				}
 				else if (xhttp.status >= 400) {
+					gettingBooks = false
 					console.error("get books failed")
 				}
 			}

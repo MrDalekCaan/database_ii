@@ -44,6 +44,10 @@ def login(user_id, passwd):
 	return None, None
 
 
+def register(username, password):
+	return eu.register(username, password)
+
+
 def _get_cats():
 	global _category
 	if _category is not None:
@@ -66,12 +70,12 @@ def get_books(f, count, price_region=None, subcat=None, key_word=None, order=Non
 	:return:list[books] satisfy requirement
 	"""
 	switch = {'time_desc': ("publish_time", "DESC"),
-			  		'time_asc': ("publish_time", "ASC"),
-			  		'sold_asc': ("sold_count", 'ASC'),
-			  		'sold_desc': ("sold_count", 'DESC')}
+			  'time_asc': ("publish_time", "ASC"),
+			  'sold_asc': ("sold_count", 'ASC'),
+			  'sold_desc': ("sold_count", 'DESC')}
 	(order_property, order_way) = switch[order]
 	constrain = Constrain()
-	constrain.apply_constraint_value("sub", subcat).apply_constraint_region("price", price_region).\
+	constrain.apply_constraint_value("sub", subcat).apply_constraint_region("price", price_region). \
 		like("book_name", key_word).order_by(order_property, order_way).from_(f).limit(count)
 	log.info(constrain)
 	cursor.execute(f"SELECT * FROM book_info WHERE {constrain}")
@@ -85,24 +89,11 @@ def get_user_cart(user_id):
 	"""
     return [] if failed
     """
-	# return []
-	# try:
-	# 	user = user_cache[user_id]
-	# except KeyError:
-	# 	user = eu.get_user(user_id)
-	# 	user_cache[user_id] = user
 	user = _get_user(user_id)
 	contents = user.get_shopping_cart()
 	t = read_columns(user.cursor, "shopping_cart")
 	li = [{t[i]: c for i, c in enumerate(content)} for content in contents]
 	return [date_time_toString("time", book_info) for book_info in li]
-
-
-# return [{"id": "ppppp", "bookname": "nnnnnn", "imgurl": "http://img3m3.ddimg.cn/51/25/23977653-1_b_12.jpg",
-# 		 "count": "111"}]
-
-
-# id,bookname,imgurl,price,count
 
 
 def update_user_cart(user_id, operation, isbn, count=None):
@@ -145,30 +136,6 @@ def add_history_record(user_id, isbn, visit_time) -> bool:
 		return False
 	user.add_history_record(isbn, visit_time)
 	return True
-
-
-def updateBook(id, author, bookname, imgurl, price):
-	cursor.execute(
-		f"update book_info set bk_author = '{author}',bk_name = '{bookname}',bk_url = '{imgurl}',bk_price = '{price}' where bk_no = '{id}'")
-	cursor.execute(f"select * from book_info where bk_no = '{id}'")
-	content = cursor.fetchone()
-	t = ['bookname', 'author', 'price', 'type', 'id', 'imgurl']
-	obj = {}
-	for (i, c) in enumerate(content):
-		obj[t[i]] = c
-	return obj
-
-
-def updateBook(id, author, bookname, imgurl, price):
-	cursor.execute(
-		f"update book_info set bk_author = '{author}',bk_name = '{bookname}',bk_url = '{imgurl}',bk_price = '{price}' where bk_no = '{id}'")
-	cursor.execute(f"select * from book_info where bk_no = '{id}'")
-	content = cursor.fetchone()
-	t = ['bookname', 'author', 'price', 'type', 'id', 'imgurl']
-	obj = {}
-	for (i, c) in enumerate(content):
-		obj[t[i]] = c
-	return obj
 
 
 def read_columns(cursor, table_name: str):

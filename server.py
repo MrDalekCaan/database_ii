@@ -115,8 +115,8 @@ def register():
 	args = parseParameter(request.data.decode('utf-8'))
 	username = args['username']
 	password = args['password']
-	user_id = B.regist(username, password)
-	return str(user_id)
+	user_id = B.register(username, password)
+	return json.dumps({"user_id": user_id})
 
 
 @app.route('/cookie/')
