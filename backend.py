@@ -114,7 +114,8 @@ def update_user_cart(user_id, operation, isbn, count=None):
 	 							1 update
     """
 	now = '{0:%Y%m%d%H%M%S}'.format(datetime.datetime.now())
-	user: eu.Customer = user_cache[user_id]
+	# user: eu.Customer = user_cache[user_id]
+	user: eu.Customer = _get_user(user_id)
 	if operation == 0:
 		if user.add_shopping_cart(isbn, now):
 			log.info(f"user {user_id} add book {isbn} to shopping cart")

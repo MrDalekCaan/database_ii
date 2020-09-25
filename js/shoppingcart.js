@@ -64,6 +64,7 @@ var app = new Vue({
 		buyThisOne: function(index) {
 			if (changingCartContent) {
 				alert("您操作的太快了")
+                return
 			} else {
 				changingCartContent = true
 			}
@@ -81,6 +82,7 @@ var app = new Vue({
 					else {
 						alert("purchase failed")
 					}
+				    changingCartContent = false
 				}
 			}
             xhttp.send()
@@ -98,14 +100,13 @@ var app = new Vue({
 			const xhttp = new XMLHttpRequest();
 			xhttp.open('GET', `shoppingcart/change?isbn=${isbn}&num=${num}`)
 			xhttp.onreadystatechange = function () {
-				if (this.readyState == 4 && this.status == 200) {
-					changingCartContent = false
+				if (xhttp.readyState == 4 && xhttp.status == 200) {
 					callback()
 				}
-				else if (this.status >= 400) {
+				else if (xhttp.status >= 400) {
 					console.log("change cart content failed")
-					changingCartContent = false
 				}
+				changingCartContent = false
 			}
 			xhttp.send()
 		}

@@ -9,7 +9,7 @@ var app = new Vue({
 		key_word:'',
 		filter: false,
 		fuzzy_mode: false,
-		pageSize: null,
+		pageSize: 6,
 		titles:{},
 		order:'time_desc',
 		lastValue: {
@@ -20,11 +20,13 @@ var app = new Vue({
 	methods: {
 		fuzzy_search_on: function() {
 			this.fuzzy_mode = true
-            this.books = this.get_books_by(0, this.pageSize)
+            // this.books = this.get_books_by(0, this.pageSize)
+            this.update()
 		},
 		fuzzy_search_off: function (){
 			this.fuzzy_mode = false
-			this.books = this.get_books_by(0, this.pageSize)
+			// this.books = this.get_books_by(0, this.pageSize)
+            this.update()
 		},
 		boundChange: function(e){
 			console.log('changed')
@@ -67,9 +69,11 @@ var app = new Vue({
 				this.$set(this.selected, 0, tempsplit[1])
 				this.$set(this.selected, 1, tempsplit[2])
 			}
-
-			const newbooks = this.get_books_by(0, this.pageSize);
-			this.books = newbooks
+			const self = this
+			this.get_books_by(0, this.pageSize, books => {
+				self.books = books
+			});
+			// this.books = newbooks
 		},
 		scroll: function (e) {
 			let ele = e.target
@@ -77,13 +81,17 @@ var app = new Vue({
 			if (maxScrolltop - ele.scrollTop >= 10)
 				return
 
-			let other_books;
+			// let other_books;
 			// if (!this.filter) {
-				other_books = this.get_books_by(this.books.length, this.pageSize)
+			// 	other_books = this.get_books_by(this.books.length, this.pageSize)
 			// } else {
-				other_books = this.get_books_by(this.books.length, this.pageSize)
+			// 	other_books = this.get_books_by(this.books.length, this.pageSize)
 			// }
-			this.books.push(...other_books)
+			// this.books.push(...other_books)
+			const self = this
+            this.get_books_by(this.books.length, this.pageSize, books => {
+            	self.books.push(...books)
+			})
 		},
 		curTitle: function() {
 			return this.titles[this.selected[0]].subcat[this.selected[1]];
@@ -122,7 +130,7 @@ var app = new Vue({
 			 }
 			xhttp.open("GET", request_parameters)
 			xhttp.onreadystatechange = () => {
-				if (this.readyState == 4 && this.status == 200) {
+				if (xhttp.readyState == 4 && xhttp.status == 200) {
 					gettingBooks = false	
 					let obj
 					try {
@@ -131,17 +139,15 @@ var app = new Vue({
 					} catch (e) {
 						console.error("xml json parse error")	
 					}
-					gettingBooks = false
 				}
-				else if (this.status >= 400) {
+				else if (xhttp.status >= 400) {
 					console.error("get books failed")
-					gettingBooks = false
 				}
 			}
 			xhttp.send()
 		},
 		update: function(){
-			this.books = this.get_books_by(0, this.pageSize)
+			// this.books = this.get_books_by(0, this.pageSize)
 			const self = this
 			self.get_books_by(0, self.pageSize, books => {
 				self.books = books
@@ -160,36 +166,52 @@ var app = new Vue({
 		let xhttp = new XMLHttpRequest()
 		xhttp.open("GET", "cats")
 		xhttp.onreadystatechange = () => {
-			let resp
-			try{
-				resp = JSON.parse(this.responseText)
-				let result = []
-				for (const cat in resp) {
-					let obj = {"subcat": resp[cat], "cat": cat}
-					result.push(obj)
+	    	if (xhttp.readyState == 4 && xhttp.status == 200) {
+				let resp
+				try{
+					resp = JSON.parse(xhttp.responseText)
+					let result = []
+					for (const cat in resp) {
+						let obj = {"subcat": resp[cat], "cat": cat}
+						result.push(obj)
+					}
+					self.titles = result
+					// books
+                   	const ele = document.getElementById('aspace2');
+					if (ele == null)
+						return;
+					// while (ele.clientHeight == ele.scrollHeight) {
+					// 	// self.books.push(...self.get_books_by(app.books.length, 3, books => {
+					// 	// }))
+                    //     self.get_books_by(self.books.length, 3, books=> {
+					//
+					// 	})
+					// }
+					self.get_books_by(0, self.pageSize, books => {
+						self.books.push(...books)
+					})
+				} catch (e) {
+					console.log("cats json parse error")
 				}
-	            self.titles = result
-			} catch (e) {
-				console.log("cats json parse error")
 			}
-		}
+			}
 		xhttp.send()
 	}
 });
 
 
-(async function(){
-	const ele = document.getElementById('aspace2');
-	if (ele == null)
-		return;
-	let pageSize = 0;
-	while (ele.clientHeight == ele.scrollHeight) {
-		pageSize += 3
-		app.books.push(...app.get_books_by(app.books.length, 3))
-		await new Promise(r => setTimeout(r, 100));
-	}
-	app.pageSize = pageSize
-})();
+// (async function(){
+// 	const ele = document.getElementById('aspace2');
+// 	if (ele == null)
+// 		return;
+// 	let pageSize = 0;
+// 	while (ele.clientHeight == ele.scrollHeight) {
+// 		pageSize += 3
+// 		app.books.push(...app.get_books_by(app.books.length, 3))
+// 		await new Promise(r => setTimeout(r, 100));
+// 	}
+// 	app.pageSize = pageSize
+// })();
 
 
 function quit() {
