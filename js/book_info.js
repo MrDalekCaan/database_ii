@@ -6,17 +6,21 @@ var app = new Vue({
 	},
 	methods:{
 		addToCart: function () {
-			if (addingToCart) return
-			else {
+			if (addingToCart) {
 				alert("too quick, please wait")
+				return
+			}
+			else {
 				addingToCart = true
 			}
 			if (hasUser()) {
 				const xhttp = new XMLHttpRequest();
 				xhttp.open("GET", `/addToCart?isbn=${this.isbn}`)
 				xhttp.onreadystatechange = () => {
-					addingToCart = false	
-					alert("add to cart successfully")
+					if (xhttp.readyState == 4 && xhttp.status == 200) {
+						alert("add to cart successfully")
+						addingToCart = false
+					}
 				}
 				xhttp.send()
 			} else {

@@ -194,9 +194,12 @@ class Customer(EShopUser):
 		"""
 		try:
 			self.cursor.execute(f"INSERT INTO purchase_history(ISBN, time, count) VALUES ({isbn}, {purchase_time}, {count})")
-			e_shop_cursor.execute(f"INSERT INTO shopping_history(isbn, count, time) VALUES({isbn}, {count}, {purchase_time})")
-			e_shop_cursor.execute(f"UPDATE book_info SET sold_count=sold_count+{count} WHERE ISBN=isbn")
 			self.db.commit()
+			self.cursor.execute(f"DELETE FROM shopping_cart WHERE ISBN={isbn}")
+			self.db.commit()
+			e_shop_cursor.execute(f"INSERT INTO shopping_history(isbn, count, time) VALUES({isbn}, {count}, {purchase_time})")
+			book_e_shop.commit()
+			e_shop_cursor.execute(f"UPDATE book_info SET sold_count=sold_count+{count} WHERE ISBN={isbn}")
 			book_e_shop.commit()
 			return True
 		except mysql.connector.errors.IntegrityError:

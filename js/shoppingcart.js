@@ -23,7 +23,7 @@ var app = new Vue({
 			const isbn = self.books[index].ISBN;
 			const obj = self.books[index];
 			let count = parseInt(obj.count) + 1
-			changeCartContent(isbn, count, function() {
+			this.changeCartContent(isbn, count, function() {
 				// self.update(index)
 				self.updateAll()
 			})
@@ -36,7 +36,7 @@ var app = new Vue({
 			if (count <= 0) {
 				return
 			}
-			changeCartContent(isbn, count, function () {
+			this.changeCartContent(isbn, count, function () {
 				// self.update(index)
 				self.updateAll()
 			})
@@ -57,7 +57,7 @@ var app = new Vue({
 		},
 		del: function (index) {
 			var isbn = this.books[index].ISBN
-			 changeCartContent(isbn, 0, function() {
+			 this.changeCartContent(isbn, 0, function() {
 			 	this.updateAll()
 			 })
 		},
@@ -71,18 +71,22 @@ var app = new Vue({
 			const isbn = this.books[index].ISBN
 			const count = this.books[index].count
 			let xhttp = new XMLHttpRequest()
+			const self = this
 			xhttp.open("GET", `purchase?isbn=${isbn}&count=${count}`)
 			xhttp.onreadystatechange = function () {
-				if (this.readyState == 4 && this.status == 200) {
-					const obj = JSON.parse(this.responseText)
+				if (xhttp.readyState == 4 && xhttp.status == 200) {
+				    changingCartContent = false
+					const obj = JSON.parse(xhttp.responseText)
 					if (obj.state){
-						this.del(index)
+						self.del(index)
 						alert("purchase success")
 					}
 					else {
 						alert("purchase failed")
 					}
-				    changingCartContent = false
+				}
+				else if (xhttp.status == 500) {
+					alert("purchase failed")
 				}
 			}
             xhttp.send()
