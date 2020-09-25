@@ -78,11 +78,26 @@ def get_books(f, count, price_region=None, subcat=None, key_word=None, order=Non
 	constrain.apply_constraint_value("sub", subcat).apply_constraint_region("price", price_region). \
 		like("book_name", key_word).order_by(order_property, order_way).from_(f).limit(count)
 	log.info(constrain)
-	cursor.execute(f"SELECT * FROM book_info WHERE {constrain}")
+	cursor.execute(f"SELECT * FROM book_info {constrain}")
 	contents = cursor.fetchall()
 	t = read_columns(cursor, "book_info")
 	li = [{t[i]: c for i, c in enumerate(content)} for content in contents]
 	return [date_time_toString("publish_time", content) for content in li]
+
+
+def get_books_personal_recommendation(user_id, f, count):
+
+	cursor.execute(f"""
+	SELECT *
+	FROM book_info
+	LEFT JOIN
+	(SELECT isbn  FROM customer_{user_id}.browser_history) B
+	ON
+	book_info.isbn=B.isbn
+	WHERE {constrain}
+	GROUP BY book_info.isbn
+	ORDER BY  COUNT(B.isbn) DESC
+	""")
 
 
 def get_user_cart(user_id):

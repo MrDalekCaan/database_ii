@@ -86,3 +86,25 @@
 		<script src="js/x.js"></script>
 	</body>
 </html>
+
+SELECT A.*
+FROM book_e_shop.book_info A
+LEFT JOIN
+(SELECT isbn FROM browser_history) B
+ON
+A.isbn=B.isbn
+<!--WHERE A.price < 30-->
+GROUP BY A.isbn
+ORDER BY  COUNT(B.isbn) DESC
+
+SELECT *
+FROM book_info
+LEFT JOIN
+(SELECT isbn  FROM customer_1898048.browser_history) B
+ON
+book_info.isbn=B.isbn
+GROUP BY book_info.isbn
+ORDER BY  COUNT(B.isbn) DESC
+<!--WHERE A.price < 30-->
+
+
