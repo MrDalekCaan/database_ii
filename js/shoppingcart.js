@@ -43,7 +43,7 @@ var app = new Vue({
 		},
 		update: function(index) {
 			const self = this
-			xmlRequest(cart => {
+			requestAllShoppingCart(cart => {
 				if (cart.length > index) {
 					self.$set(self.books, index, cart[index])
 				}
@@ -51,14 +51,15 @@ var app = new Vue({
 		},
 		updateAll: function() {
 			const self = this
-			xmlRequest(cart => {
+			requestAllShoppingCart(cart => {
 				self.books = cart
 			})
 		},
 		del: function (index) {
 			var isbn = this.books[index].ISBN
-			 this.changeCartContent(isbn, 0, function() {
-			 	this.updateAll()
+            const self = this
+			 self.changeCartContent(isbn, 0, function() {
+			 	self.updateAll()
 			 })
 		},
 		buyThisOne: function(index) {
@@ -132,8 +133,8 @@ function sendChangeReq(oldid, newid, bookname, author, price, imgurl) {
 	return obj.content
 }
 
-function xmlRequest(callback) {
-	var xhttp = new XMLHttpRequest()
+function requestAllShoppingCart(callback) {
+	const xhttp = new XMLHttpRequest();
 	xhttp.open("GET", "shoppingcart")
 	xhttp.onreadystatechange = function() {
 		if (this.readyState == 4 && this.status == 200) {
