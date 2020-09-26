@@ -3,21 +3,9 @@ var app = new Vue({
 	data: {
 		books: [],
 		selected: [0, 0],
-		 titles:[
-		 	{
-		 		cat:'摄影服务',
-		 		titles:['人像写真', '静物拍摄', '产品摄影', '创意婚纱照', '儿童成长记录']
-		 	},
-		 	{
-		 		cat: '创意摄影',
-		 		titles: ['水下拍摄', '高空航拍', '旅途跟拍', '星空摄影', '可爱宝宝']
-		 	},
-		 	{
-		 		cat: '记录时光',
-		 		titles:['儿童成长记录', '定格婚礼瞬间', '仪式全纪实', '老年结婚照']
-		 	}
-		 ],
-		 pagesize: 21,
+		 titles:[],
+		 // pagesize: 21,
+        pageSize: 15,
 		 pagecount:1
 	},
 	methods: {
@@ -100,16 +88,63 @@ var app = new Vue({
 			return this.titles[this.selected[0]].titles[this.selected[1]];
 		},
 		updatePage: function() {
-			var cat = this.curTitle()
-			var newbooks = xmlRequest(cat, (this.pagecount - 1) * this.pagesize, this.pagesize)
+			const newbooks = self.get_books((this.pagecount - 1) * this.pageSize, this.pageSize);
 			if (newbooks.length == 0) {
 				return false;
 			}
 			this.books = newbooks
 			return true;
 		},
+		get_books: function(from=0, count=30, isbn=null, success, fail) {
+			const xhttp = new XMLHttpRequest();
+			const subcat = this.curTitle()
+			if (subcat != null){
+				xhttp.open("GET", `books?subcat=${subcat}&from=${from}&count=${count}`)
+			}
+			else if (isbn != null) {
+				xhttp.open("GET", `book?code=${isbn}`)
+			}
+			else return [];
+			xhttp.onreadystatechange = () => {
+				if (xhttp.readyState == 4 && xhttp.status == 200) {
+					success(JSON.parse(xhttp.responseText).content)
+				} else if (xhttp.status >= 400) {
+					fail()	
+				}
+			}
+			xhttp.send()
+			var obj;
+			try {
+				obj = JSON.parse(xhttp.responseText)
+			} catch(e) {
+				console.log("xml json parse error")
+				return [];
+			}
+			return obj.content
+		},
+	},
+	created() {
+		let self = this
+		let xhttp = new XMLHttpRequest()
+		xhttp.open("GET", "cats")
+		xhttp.onreadystatechange = () => {
+	    	if (xhttp.readyState == 4 && xhttp.status == 200) {
+				let resp
+				try {
+					resp = JSON.parse(xhttp.responseText)
+					let result = []
+					for (const cat in resp) {
+						let obj = {"subcat": resp[cat], "cat": cat}
+						result.push(obj)
+					}
+					self.titles = result
+				}catch (e) {
+					console.log("cats json parse error")
+				}
+	    	}
+		}
+		xhttp.send()
 	}
-		
 });
 
 // change if there is a book
@@ -122,43 +157,22 @@ function sendChangeReq(id, bookname, author, price, imgurl) {
 	return obj.content
 }
 
-function xmlRequest(cat=null, from=0, count=30, code=null) {
-	var xhttp = new XMLHttpRequest()
-	if (cat != null){
-		xhttp.open("GET", `books?cat=${cat}&from=${from}&count=${count}`, false)
-	}
-	else if (code != null) {
-		xhttp.open("GET", `book?code=${code}`, false)
-	}
-	else return [];
-	xhttp.send()
-	var obj;
-	try {
-		obj = JSON.parse(xhttp.responseText)
-	} catch(e) {
-		console.log("xml json parse error")
-		return [];
-	}
 
-	return obj.content
+// (async function(){
+// 	var ele = document.getElementById('aspace2')
+// 	if (ele == null)
+// 		return;
+//
+// 	var count = 0;
 
-}
-
-(async function(){
-	var ele = document.getElementById('aspace2')
-	if (ele == null)
-		return;
-
-	var count = 0;
-
-	while (ele.clientHeight == ele.scrollHeight) {
-		count++;
+	// while (ele.clientHeight == ele.scrollHeight) {
+	// 	count++;
 		// app.books.push(...xmlRequest('xxx', 0, 3))
-		app.books.push(...xmlRequest(app.curTitle(), app.books.length, 1))
-		await new Promise(r => setTimeout(r, 80));
-	}
-	app.pagesize = count;
-})();
+		// app.books.push(...xmlRequest(app.curTitle(), app.books.length, 1))
+		// await new Promise(r => setTimeout(r, 80));
+// 	}
+// 	app.pagesize = count;
+// })();
 
 
 

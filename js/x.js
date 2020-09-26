@@ -174,13 +174,6 @@ var app = new Vue({
                    	const ele = document.getElementById('aspace2');
 					if (ele == null)
 						return;
-					// while (ele.clientHeight == ele.scrollHeight) {
-					// 	// self.books.push(...self.get_books_by(app.books.length, 3, books => {
-					// 	// }))
-                    //     self.get_books_by(self.books.length, 3, books=> {
-					//
-					// 	})
-					// }
 					self.get_books_by(0, self.pageSize, books => {
 						self.books.push(...books)
 					})

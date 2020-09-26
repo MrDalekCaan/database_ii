@@ -29,20 +29,31 @@
 						<div class="daogou" id="daogou1">
 							<ul class="daogoulist">
 								<li>页面向导</li>
+					 <li v-for='(obj, x) in titles'>
+						 <span style="color: aliceblue">{{ obj.cat }}</span>
+						 <ul>
+							 <li v-for='(t, y) in obj.subcat'
+							 :id="'title-' + x + '-' + y"
+							 :class="{ selectedcat: x == selected[0] && y == selected[1] }"
+							 @click="chosecat">
+								 <span>{{ t }}</span>
+							 </li>
+						 </ul>
+					 </li>
 
-								<template v-for='(title, x) in titles'>
-									<li>
-										<span style="color: aliceblue">{{ title.cat }}</span>
-										<ul>
-											<li v-for='(t, y) in title.titles' 
-											:id="'title-' + x + '-' + y" 
-											:class="{ selectedcat: x == selected[0] && y == selected[1] }"
-											@click="chosecat">
-												<span>{{ t }}</span>
-											</li>
-										</ul>
-									</li>
-								</template>
+<!--								<template v-for='(title, x) in titles'>-->
+<!--									<li>-->
+<!--										<span style="color: aliceblue">{{ title.cat }}</span>-->
+<!--										<ul>-->
+<!--											<li v-for='(t, y) in title.titles' -->
+<!--											:id="'title-' + x + '-' + y" -->
+<!--											:class="{ selectedcat: x == selected[0] && y == selected[1] }"-->
+<!--											@click="chosecat">-->
+<!--												<span>{{ t }}</span>-->
+<!--											</li>-->
+<!--										</ul>-->
+<!--									</li>-->
+<!--								</template>-->
 							</ul>
 						</div>
 					</div>
