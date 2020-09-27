@@ -1,14 +1,16 @@
 import datetime
 
-from typing import Dict
-
 import e_shop_user as eu
 import time
 from collections import defaultdict
 from constrainfactory import Constrain
 from Cache import Cache
-from Constants import CACHE_TIME
+from Constants import CACHE_TIME, SERVER_PORT, TOKEN
 import log
+import qrcode
+import socket
+import string
+import random
 
 
 class frange():
@@ -24,8 +26,40 @@ cursor = eu.e_shop_cursor
 
 user_cache = Cache(CACHE_TIME)
 column_cache = Cache(CACHE_TIME)
+token_cache = Cache(TOKEN)
+""":content {user_id user_name user_type} | None"""
 _columns = {}
 _category = None
+
+
+def get_ip_address():
+	s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+	s.connect(("8.8.8.8", 80))
+	return s.getsockname()[0]
+
+
+def generate_login_token():
+	letters = string.ascii_uppercase
+	return ''.join(random.choice(letters) for i in range(20))
+
+
+def generate_qr_by_token(token):
+	img_url = f"http://{get_ip_address()}:{SERVER_PORT}/img/token/{token}.png"
+	img_content = f"http://{get_ip_address()}:{SERVER_PORT}/mobile_login_page?token={token}"
+	img = qrcode.make(img_content)
+	with open(f"./img/token/{token}.png", "wb") as file:
+		img.save(file, "png")
+	token_cache[token] = None
+	return img_url
+
+
+def mobile_login(token, user_id, password):
+	user_name, user_type = login(user_id, password)
+	if user_name:
+		token_cache[token] = {"user_name": user_name, "user_id": user_id, "user_type": user_type}
+		return token_cache[token]
+	else:
+		return None
 
 
 def login(user_id, passwd):
@@ -85,9 +119,8 @@ def get_books(f, count, price_region=None, subcat=None, key_word=None, order=Non
 	return [date_time_toString("publish_time", content) for content in li]
 
 
-def get_books_personal_recommendation(user_id, f, count):
-
-
+def get_personal_recommendation(user_id, f, count):
+	constrain = Constrain()
 	cursor.execute(f"""
 	SELECT *
 	FROM book_info
@@ -95,7 +128,6 @@ def get_books_personal_recommendation(user_id, f, count):
 	(SELECT isbn  FROM customer_{user_id}.browser_history) B
 	ON
 	book_info.isbn=B.isbn
-	WHERE {constrain}
 	GROUP BY book_info.isbn
 	ORDER BY  COUNT(B.isbn) DESC
 	LIMIT {f}, {count}

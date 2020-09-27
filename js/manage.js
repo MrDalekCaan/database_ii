@@ -109,7 +109,7 @@ var app = new Vue({
 				if (xhttp.readyState == 4 && xhttp.status == 200) {
 					success(JSON.parse(xhttp.responseText).content)
 				} else if (xhttp.status >= 400) {
-					fail()	
+					fail()
 				}
 			}
 			xhttp.send()

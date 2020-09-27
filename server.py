@@ -6,6 +6,7 @@ from flask import Flask, render_template, request, redirect, make_response, send
 import time
 import datetime
 import json
+import os
 from Constants import LIFE_TIME, FAIL, OK
 # from untitled import books
 import backend as B
@@ -27,8 +28,9 @@ loginpg = 'loginpg.html'
 indexpg = './index.html'
 managepg = './manage.html'
 shoppingcartpg = './shoppingcart.html'
-book_infopg = './book_info.html'
-registerpg = './register.html'
+book_info_page_path = './book_info.html'
+register_page_path = './register.html'
+mobile_login_page_path = "./m.html"
 
 
 def readfile(filename):
@@ -107,7 +109,7 @@ def index():
 
 @app.route("/registerpg")
 def registerpage():
-	return readfile(registerpg)
+	return readfile(register_page_path)
 
 
 @app.route("/register", methods=["POST"])
@@ -133,15 +135,19 @@ def cookie():
 	return res
 
 
-@app.route('/loginpg')
-def loginpage():
-	return readfile(loginpg)
-
-
 @app.route('/manage')
 def managepage():
 	# return readfile(managepg)
 	return render_template(managepg, username='admin')
+
+
+@app.route('/loginpg')
+def loginpage():
+	token = B.generate_login_token()
+	img_url = B.generate_qr_by_token(token)
+	resp = make_response(render_template(loginpg, img_url=img_url))
+	resp.set_cookie("token", token)
+	return resp
 
 
 @app.route("/login", methods=['GET', 'POST'])
@@ -163,7 +169,48 @@ def login():
 		resp.set_cookie("user_id", user_id, max_age=LIFE_TIME)
 		resp.set_cookie("user_type", user_type, max_age=LIFE_TIME)
 	else:
-		resp = make_response(json.dump(res))
+		resp = make_response(json.dumps(res))
+	return resp
+
+
+@app.route("/login_state")
+def login_state():
+	"""
+	error:
+	0. normal
+	1. token expired
+	"""
+	token = request.cookies.get("token")
+	status = {"login_state": False, "error": 0, "user_info": None}
+	try:
+		if B.token_cache[token]:
+			status["user_info"] = B.token_cache[token]
+			status["login_state"] = True
+		else:
+			pass
+	except KeyError:
+		status["error"] = 1
+	finally:
+		return json.dumps(status)
+
+
+@app.route("/mobile_login", methods=['POST'])
+def mobile_login():
+	token = request.cookies.get("token")
+	args = parseParameter(request.data.decode("utf-8"))
+	user_id = args["user_id"]
+	password = args["password"]
+	if B.mobile_login(token, user_id, password):
+		return OK
+	else:
+		return FAIL
+
+
+@app.route("/mobile_login_page")
+def mobile_login_page():
+	token = request.args.get("token")
+	resp = make_response(readfile(mobile_login_page_path))
+	resp.set_cookie("token", token)
 	return resp
 
 
@@ -211,7 +258,7 @@ def get_book_info():
 	book = B.get_book_by_isbn(isbn)
 	if user_id:
 		B.add_history_record(user_id, isbn, '{0:%Y%m%d%H%M%S}'.format(datetime.datetime.now()))
-	resp = make_response(render_template(book_infopg, **book))
+	resp = make_response(render_template(book_info_page_path, **book))
 	update_login(resp)
 	return resp
 
@@ -394,6 +441,9 @@ def null_parameter(value):
 
 if __name__ == "__main__":
 	host, port = "0.0.0.0", 5001
+
+	for img in os.listdir('./img/token'):
+		os.remove(os.path.join('./img/token', img))
 
 	# with TCPServer((host, port), TCPHandler) as server:
 	# 	server.serve_forever()

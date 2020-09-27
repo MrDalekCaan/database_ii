@@ -1,4 +1,4 @@
-val gettingShoppingCart = false
+var gettingShoppingCart = false
 var app = new Vue({
 	el: '#aspace2',
 	data: {

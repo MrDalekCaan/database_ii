@@ -50,8 +50,8 @@ function getCookie(name) {
 }
 
 function setCookie(cname, cvalue, second) {
-  var d = new Date();
-  d.setTime(d.getTime() + (second * 1000));
-  var expires = "expires="+ d.toUTCString();
-  document.cookie = cname + "=" + cvalue + ";" + expires + ";path=/";
+	const d = new Date();
+	d.setTime(d.getTime() + (second * 1000));
+	const expires = "expires=" + d.toUTCString();
+	document.cookie = cname + "=" + cvalue + ";" + expires + ";path=/";
 }
