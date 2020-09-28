@@ -12,6 +12,7 @@ var app = new Vue({
 		pageSize: 6,
 		titles:{},
 		order:'time_desc',
+		all_now: false,
 		lastValue: {
 			"low": "",
 			"high": ""
@@ -64,6 +65,12 @@ var app = new Vue({
 		 	// }
 
 		},
+		all: function() {
+			this.all_now = true
+			this.$set(this.selected, 0, -1)
+			this.$set(this.selected, 1, -1)
+			this.updatePage()
+		},
 		chosecat: function(e) {
 		    // set current subcat
 			let target = e.target;
@@ -97,6 +104,9 @@ var app = new Vue({
 			})
 		},
 		curTitle: function() {
+			if (this.all_now) {
+				return ''
+			}
 			return this.titles[this.selected[0]].subcat[this.selected[1]];
 		},
 		startFilter: function (){

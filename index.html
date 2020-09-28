@@ -47,7 +47,7 @@
 
 					 <div class="daogou" id="daogou1">
 					 <ul class="daogoulist">
-					 <li>页面向导</li>
+					 <li :class="{ selectedcat: all_now }" @click="all">所有</li>
 
 					 <li v-for='(obj, x) in titles'>
 						 <span style="color: aliceblue">{{ obj.cat }}</span>

@@ -12,6 +12,7 @@
 
 			<div class="top"><!--top是页面顶部一栏-->
 			<div align="center"><a href="[[ loginpg ]]"><font face="方正舒体" size="5" color="aliceblue">[[ username ]]</a></div>
+			<a href="#" style="display: [[ display ]]" onclick="quit(); return false;">退出登陆</a>
 			</div>
 
 			<div id="app">
@@ -28,7 +29,7 @@
 						
 						<div class="daogou" id="daogou1">
 							<ul class="daogoulist">
-								<li :class="{ selectedcat: all_now }" @click="all">页面向导</li>
+								<li :class="{ selectedcat: all_now }" @click="all">所有</li>
 					 <li v-for='(obj, x) in titles'>
 						 <span style="color: aliceblue">{{ obj.cat }}</span>
 						 <ul>
@@ -96,6 +97,7 @@
 			</div>
 
 		<!-- <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script> -->
+		<script src="js/util.js"></script>
 		<script src="js/vue.js"></script>
 		<script src="/js/manage.js"></script>
 

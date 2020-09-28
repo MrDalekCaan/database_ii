@@ -147,7 +147,10 @@ def read_columns():
 
 @app.route('/manage')
 def managepage():
-	return render_template(managepg, username='admin')
+	if get_user_id():
+		return render_template(managepg, username='admin')
+	else:
+		return redirect("/")
 
 
 @app.route('/loginpg')

@@ -235,6 +235,13 @@ function sendChangeReq(id, bookname, author, price, imgurl) {
 // 	app.pagesize = count;
 // })();
 
+function quit() {
+	const user_id = getCookie('user_id');
+	if (user_id) {
+		setCookie("user_id", user_id, 0)
+		window.location.reload()
+	}
+}
 
 
 
