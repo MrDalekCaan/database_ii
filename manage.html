@@ -28,7 +28,7 @@
 						
 						<div class="daogou" id="daogou1">
 							<ul class="daogoulist">
-								<li>页面向导</li>
+								<li :class="{ selectedcat: all_now }" @click="all">页面向导</li>
 					 <li v-for='(obj, x) in titles'>
 						 <span style="color: aliceblue">{{ obj.cat }}</span>
 						 <ul>
@@ -60,21 +60,26 @@
 
 					<div id="aspace2" class="container" >
 						<table>
-							<tr>
+							<tr><!-- 
 								<th width="16%">book id</th>
 								<th width="21%">book name</th>
 								<th width="21%">author</th>
 								<th width="21%">price</th>
-								<th width="21%">image url</th>
+								<th width="21%">image url</th> -->
+								<th>isbn</th>
+								<th v-for="editable in editable_columns">{{editable}}</th>
 							</tr>
 							<tr v-for="(book, i) in books" :id="book.id" :index="i">
-								<td><input :value="book.id"></input></td>
-								<td><input :value="book.bookname"></input></td>
+								<td><span>{{book.ISBN}}</span></td>
+								<!-- <td><input :value="book.book_name"></input></td>
 								<td><input :value="book.author"></input></td>
 								<td><input :value="book.price"></input></td>
-								<td><input :value="book.imgurl"></input></td>
+								<td><input :value="book.img_url"></input></td>-->	
+								<td v-for="editable in editable_columns">
+									<input :value="book[editable]"></input>
+								</td>
 								<td><button @click="change">change</button></td>
-								<td><button @click="del">delete</button></td>	
+								<td><button @click="del">delete</button></td> 
 							</tr>	
 						</table>
 					</div>

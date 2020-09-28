@@ -71,11 +71,17 @@ def parseParameter(string):
 	return parameter_set
 
 
+def default(value, df):
+	return value if value is not None else df;
+
+
 @app.route("/")
 def root():
 	# with open('index.html', 'r') as file:
 	# 	html = file.read()
 	# return "server response"
+	if get_user_id() is not None and get_user_type() == "0000":
+		return redirect("/manage")
 	return redirect('/index')
 
 
@@ -121,10 +127,10 @@ def register():
 	return json.dumps({"user_id": user_id})
 
 
-@app.route('/cookie/')
-def cookie():
-	res = make_response("Setting a cookie")
-	res.set_cookie('foo', 'bar', max_age=60 * 60 * 24 * 365 * 2)
+# @app.route('/cookie/')
+# def cookie():
+# 	res = make_response("Setting a cookie")
+# 	res.set_cookie('foo', 'bar', max_age=60 * 60 * 24 * 365 * 2)
 
 	# set age to 0 to delete cookie
 	# res = make_response("Cookie Removed")
@@ -132,12 +138,15 @@ def cookie():
 
 	# get value of cookie name foo
 	# request.cookies.get('foo')
-	return res
+	# return res
+
+@app.route("/read_columns")
+def read_columns():
+	return json.dumps({'content': B.read_columns(B.cursor, "book_info")})
 
 
 @app.route('/manage')
 def managepage():
-	# return readfile(managepg)
 	return render_template(managepg, username='admin')
 
 
@@ -222,25 +231,26 @@ def get_cats():
 @app.route('/books')
 def get_books():
 	log.debug(request.args)
-	subcat = request.args.get('subcat')
+	subcat = null_parameter(request.args.get('subcat'))
+	log.debug(f"subcat: {subcat}")
 	f = int(request.args.get('from'))
 	count = int(request.args.get('count'))
 	low = null_parameter(request.args.get('low'))
 	high = null_parameter(request.args.get('high'))
 	key_word = null_parameter(request.args.get('key_word'))
-	order = request.args.get('orderby')
+	order = default(request.args.get('orderby'), "time_desc")
 	bks = B.get_books(f, count, price_region=[low, high], subcat=subcat, key_word=key_word, order=order)
 	bks = {"content": bks}
 	return json.dumps(bks)
 
 
-@app.route('/book')
-def getbook():
-	return '''
-	{
-		"content": [{"name":"幼儿绘本", "price":"¥29.70", "image":"http://img3m4.ddimg.cn/58/18/1179371614-1_b_14.jpg", "author":""}]
-	}
-	'''
+# @app.route('/book')
+# def getbook():
+# 	return '''
+# 	{
+# 		"content": [{"name":"幼儿绘本", "price":"¥29.70", "image":"http://img3m4.ddimg.cn/58/18/1179371614-1_b_14.jpg", "author":""}]
+# 	}
+# 	'''
 
 
 def padzero(t):
@@ -263,10 +273,13 @@ def get_book_info():
 	return resp
 
 
-# ----------manager-----------
-def change(**kw):
-	return kw
+@app.route("/get_single_book")
+def get_single_book():
+	isbn = request.args.get("isbn")
+	return json.dumps(B.get_book_by_isbn(isbn))
 
+
+# ----------manager-----------
 
 def deleteById(bookid):
 	"""
@@ -283,19 +296,20 @@ def deleteById(bookid):
 	return True
 
 
-@app.route('/manage/change', methods=["POST"])
+@app.route('/manage/change')
 def manageChange():
 	"""
 	change entry in database
-
 	return:
 		changed entry -> json string
 	"""
-	args = parseParameter(request.data.decode("utf-8"))
-	# ! change is function by wzy
-	result = change(**args)
-	result = {"content": result}
-	return json.dumps(result)
+	user_id = get_user_id()
+	# args = parseParameter(request.data.decode("utf-8"))
+	args = dict(request.args)
+	log.debug(args)
+	if B.change_book_info(user_id, args):
+		return OK
+	return FAIL
 
 
 @app.route("/manage/delete", methods=["POST"])
@@ -406,6 +420,8 @@ def js(path):
 
 @app.errorhandler(404)
 def err404(e):
+	if get_user_id() is not None and get_user_type() == "0000":
+		return redirect('/manage')
 	return redirect('/')
 
 

@@ -29,29 +29,39 @@ var app = new Vue({
             this.update()
 		},
 		boundChange: function(e){
-			console.log('changed')
-			this.lastValue.low = this.low
-			this.lastValue.high = this.high
-			var id = e.target.id
-		 	if (this.high == null || this.high == "")
-		 		this.high = 0
-		 	if (this.low == null || this.low == "")
-		 		this.low = 0
+			// this.lastValue.low = this.low
+			// this.lastValue.high = this.high
+			// const id = e.target.id;
+			if (this.high < 0)
+				this.high = ""
+			if (this.low < 0)
+				this.low = ""
+			if (this.high == "" || this.low == "")
+				return
+			if (this.low > this.high) {
+				let temp = this.low
+				this.low = this.high
+				this.high = temp
+			}
+			// if (this.high == null || this.high == "")
+		 	// 	this.high = 0
+		 	// if (this.low == null || this.low == "")
+		 	// 	this.low = 0
 
-		 	var high = parseFloat(this.high)
-		 	var low = parseFloat(this.low)
+		 	// var high = parseFloat(this.high)
+		 	// var low = parseFloat(this.low)
+			//
+		 	// high = high < 0 ? 0 : high
+		 	// low = low < 0 ? 0 : low
+			//
+		 	// this.high = high
+		 	// this.low = low
 
-		 	high = high < 0 ? 0 : high
-		 	low = low < 0 ? 0 : low
-
-		 	this.high = high
-		 	this.low = low
-
-		 	if (id == 'low' && low > high) {
-		 		this.high = this.low
-		 	} else if (id == 'high' && high < low) {
-		 		this.low = this.high
-		 	}
+		 	// if (id == 'low' && low > high) {
+		 	// 	this.high = this.low
+		 	// } else if (id == 'high' && high < low) {
+		 	// 	this.low = this.high
+		 	// }
 
 		},
 		chosecat: function(e) {
@@ -102,7 +112,9 @@ var app = new Vue({
 			this.updatePage()
 		},
 		updatePage: function () {
-			this.books = this.get_books_by( 0, this.pageSize)
+			this.get_books_by( 0, this.pageSize, books => {
+				this.books = books
+			})
 		},
 		 get_books_by: function(from=0, count=30, callback) {
 		 	/*

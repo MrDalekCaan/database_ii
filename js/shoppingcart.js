@@ -41,18 +41,26 @@ var app = new Vue({
 				self.updateAll()
 			})
 		},
-		update: function(index) {
-			const self = this
-			requestAllShoppingCart(cart => {
-				if (cart.length > index) {
-					self.$set(self.books, index, cart[index])
-				}
-			})
-		},
+		// update: function(index) {
+		// 	const self = this
+		// 	requestAllShoppingCart(cart => {
+		// 		if (cart.length > index) {
+		// 			self.$set(self.books, index, cart[index])
+		// 		}
+		// 	})
+		// },
 		updateAll: function() {
 			const self = this
-			requestAllShoppingCart(cart => {
+			requestAllShoppingCart(async cart => {
 				self.books = cart
+                for (let i = 0; i < self.books.length; i++) {
+                	// await new Promise(r => setTimeout(r, 100))
+					// get_single_book(self.books[i].ISBN, true, book => {
+					// 	self.$set(self.books, i, Object.assign(self.books[i], book))
+					// })
+                    let book = get_single_book(self.books[i].ISBN, false)
+					self.$set(self.books, i, Object.assign(self.books[i], book))
+				}
 			})
 		},
 		del: function (index) {

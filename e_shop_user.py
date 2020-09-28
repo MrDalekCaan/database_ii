@@ -240,6 +240,24 @@ class Admin(EShopUser):
 		'''
 		self.create_table('change_history', definition)
 
+	def change_book_info(self, kwargs):
+		# construct columns
+		value = ""
+		log.debug(f"admin: {kwargs}")
+		isbn = kwargs['ISBN']
+		for key in kwargs:
+			value += f" {key}='{kwargs[key]}', "
+		value = value.strip(", ")
+		log.debug(f"value: {value}")
+		try:
+			log.debug(f"sql: -- UPDATE book_info SET {value} WHERE ISBN={isbn}")
+			e_shop_cursor.execute(f"UPDATE book_info SET {value} WHERE ISBN={isbn}")
+			book_e_shop.commit()
+			return True
+		except:
+			return False
+
+
 
 def login(user_id, password):
 	"""

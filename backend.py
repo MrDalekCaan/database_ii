@@ -17,7 +17,7 @@ class frange():
 	def __init__(self, left, right):
 		self.left = min(left, right)
 		self.right = max(left, right)
-
+				
 	def __contains__(self, value):
 		return self.left <= value <= self.right
 
@@ -25,7 +25,7 @@ class frange():
 cursor = eu.e_shop_cursor
 
 user_cache = Cache(CACHE_TIME)
-column_cache = Cache(CACHE_TIME)
+column_cache = {}
 token_cache = Cache(TOKEN)
 """:content {user_id user_name user_type} | None"""
 _columns = {}
@@ -109,10 +109,11 @@ def get_books(f, count, price_region=None, subcat=None, key_word=None, order=Non
 			  'sold_desc': ("sold_count", 'DESC')}
 	(order_property, order_way) = switch[order]
 	constrain = Constrain()
+	log.debug(f"get_books-price_region:{price_region}")
 	constrain.apply_constraint_value("sub", subcat).apply_constraint_region("price", price_region). \
 		like("book_name", key_word).order_by(order_property, order_way).from_(f).limit(count)
-	log.info(constrain)
-	cursor.execute(f"SELECT * FROM book_info WHERE {constrain}")
+	log.debug(constrain)
+	cursor.execute(f"SELECT * FROM book_info {constrain}")
 	contents = cursor.fetchall()
 	t = read_columns(cursor, "book_info")
 	li = [{t[i]: c for i, c in enumerate(content)} for content in contents]
@@ -187,6 +188,13 @@ def add_history_record(user_id, isbn, visit_time) -> bool:
 	return True
 
 
+def change_book_info(user_id, kwargs):
+	user = _get_user(user_id)
+	log.debug(kwargs)
+	log.debug(user.type)
+	return user.change_book_info(kwargs)
+
+
 def read_columns(cursor, table_name: str):
 	key = hex(id(cursor)) + table_name
 	# if table_name in _columns.keys():
@@ -202,12 +210,16 @@ def read_columns(cursor, table_name: str):
 
 
 def get_book_by_isbn(isbn):
+	"""
+	:param isbn:
+	:return: dict
+	"""
 	cursor.execute(f"SELECT * FROM book_info WHERE ISBN='{isbn}'")
 	result = cursor.fetchone()
 	t = read_columns(cursor, "book_info")
 	if result is not None:
 		result = {key: value for key, value in zip(t, result)}
-		return result
+		return date_time_toString("publish_time", result)
 	else:
 		return None
 
@@ -227,8 +239,12 @@ def purchase(user_id, isbn, count):
 
 
 def date_time_toString(property_name, book_info):
-	book_info[property_name] = book_info[property_name].strftime("%Y-%m-%d %H:%M:%S")
-	return book_info
+	try:
+		book_info[property_name] = book_info[property_name].strftime("%Y-%m-%d %H:%M:%S")
+	except:
+		pass
+	finally:
+		return book_info
 
 
 def _get_user(user_id):

@@ -15,7 +15,7 @@ function submit() {
 }
 
 
-function check_login_state () {
+(function check_login_state () {
 	const xhttp = new XMLHttpRequest()
 	xhttp.open('GET', "login_state")
 	xhttp.onreadystatechange = async () => {
@@ -35,9 +35,8 @@ function check_login_state () {
 		}
 	}
 	xhttp.send()
-}
+})()
 
-check_login_state()
 // $('form button').on("click",function(e){
 //     e.preventDefault();
 // });
