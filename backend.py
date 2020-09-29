@@ -11,6 +11,7 @@ import qrcode
 import socket
 import string
 import random
+import threading
 
 
 class frange():
@@ -21,7 +22,7 @@ class frange():
 	def __contains__(self, value):
 		return self.left <= value <= self.right
 
-
+lock = threading.Lock()
 cursor = eu.e_shop_cursor
 
 user_cache = Cache(CACHE_TIME)
@@ -86,8 +87,10 @@ def _get_cats():
 	global _category
 	if _category is not None:
 		return _category
+	lock.acquire()
 	cursor.execute("SELECT DISTINCT cat, sub FROM book_info")
 	cats = cursor.fetchall()
+	lock.release()
 	_category = defaultdict(list)
 	for cat_group in cats:
 		_category[cat_group[0]].append(cat_group[1])
@@ -113,8 +116,10 @@ def get_books(f, count, price_region=None, subcat=None, key_word=None, order=Non
 	constrain.apply_constraint_value("sub", subcat).apply_constraint_region("price", price_region). \
 		like("book_name", key_word).order_by(order_property, order_way).from_(f).limit(count)
 	log.debug(constrain)
+	lock.acquire()
 	cursor.execute(f"SELECT * FROM book_info {constrain}")
 	contents = cursor.fetchall()
+	lock.release()
 	t = read_columns(cursor, "book_info")
 	li = [{t[i]: c for i, c in enumerate(content)} for content in contents]
 	return [date_time_toString("publish_time", content) for content in li]
@@ -122,6 +127,7 @@ def get_books(f, count, price_region=None, subcat=None, key_word=None, order=Non
 
 def get_personal_recommendation(user_id, f, count):
 	constrain = Constrain()
+	lock.acquire()
 	cursor.execute(f"""
 	SELECT *
 	FROM book_info
@@ -133,6 +139,7 @@ def get_personal_recommendation(user_id, f, count):
 	ORDER BY  COUNT(B.isbn) DESC
 	LIMIT {f}, {count}
 	""")
+	lock.release()
 
 
 def get_user_cart(user_id):
@@ -201,8 +208,10 @@ def read_columns(cursor, table_name: str):
 	# 	return _columns[table_name]
 	if key in column_cache.keys():
 		return column_cache[key]
+	lock.acquire()
 	cursor.execute(f"DESC {table_name}")
 	result = cursor.fetchall()
+	lock.release()
 	result = [content[0] for content in result]
 	# _columns[table_name] = result
 	column_cache[key] = result
@@ -214,8 +223,10 @@ def get_book_by_isbn(isbn):
 	:param isbn:
 	:return: dict
 	"""
+	lock.acquire()
 	cursor.execute(f"SELECT * FROM book_info WHERE ISBN='{isbn}'")
 	result = cursor.fetchone()
+	lock.release()
 	t = read_columns(cursor, "book_info")
 	if result is not None:
 		result = {key: value for key, value in zip(t, result)}
