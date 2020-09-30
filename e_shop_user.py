@@ -2,6 +2,8 @@ import mysql.connector
 import time
 import log
 from mysql.connector.errors import IntegrityError
+from wrapper import MysqlCursorWrapper
+
 dbconfig = {
 	'host': "localhost",
 	'user': "root",
@@ -9,7 +11,7 @@ dbconfig = {
 	'database': "book_e_shop",
 }
 book_e_shop = mysql.connector.connect(**dbconfig)
-e_shop_cursor = book_e_shop.cursor()
+e_shop_cursor = MysqlCursorWrapper(book_e_shop.cursor())
 
 
 class EShopUser:
@@ -101,6 +103,7 @@ class Customer(EShopUser):
 		config = dbconfig.copy()
 		config["database"] = f"customer_{user_id}"
 		self.db, self.cursor = self.get_database(config)
+		self.cursor = MysqlCursorWrapper(self.cursor)
 		# check table
 		self.cursor.execute("SHOW TABLES")
 		tables = self.cursor.fetchall()
@@ -215,6 +218,7 @@ class Admin(EShopUser):
 		config = dbconfig.copy()
 		config["database"] = f"admin_{user_id}"
 		self.db, self.cursor = self.get_database(config)
+		self.cursor = MysqlCursorWrapper(self.cursor)
 		self.cursor.execute(f"SHOW TABLES")
 		# check table
 		tables = self.cursor.fetchall()
