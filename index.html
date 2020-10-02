@@ -26,6 +26,7 @@
 			<li><div id="time_desc">时间降序</div></li>
 			<li><div id="sold_asc">销量升序</div></li>
 			<li><div id="sold_desc">销量降序</div></li>
+			<li><div id="personal_recommendation">个人推荐</div></li>
 		</ul>
 
 		<div id="aspace1">
@@ -87,14 +88,14 @@
 	</body>
 </html>
 
-SELECT A.*
+<!-- SELECT A.*
 FROM book_e_shop.book_info A
 LEFT JOIN
 (SELECT isbn FROM browser_history) B
 ON
 A.isbn=B.isbn
-<!--WHERE A.price < 30-->
-GROUP BY A.isbn
+ --><!--WHERE A.price < 30-->
+<!-- GROUP BY A.isbn
 ORDER BY  COUNT(B.isbn) DESC
 
 SELECT *
@@ -105,6 +106,6 @@ ON
 book_info.isbn=B.isbn
 GROUP BY book_info.isbn
 ORDER BY  COUNT(B.isbn) DESC
-<!--WHERE A.price < 30-->
+ --><!--WHERE A.price < 30-->
 
 

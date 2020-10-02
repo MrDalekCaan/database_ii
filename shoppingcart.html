@@ -1,52 +1,41 @@
 <!DOCTYPE html>
-<html>
-	<head>
-		<meta charset="utf-8">
-		<title>旺仔的光影小店 光影 时光</title>
-		<link type="text/css" rel="stylesheet" href="css/style1.css">
-		<link rel="stylesheet" href="css/shoppingcart.css">
-
-	</head>
-	<body background="img/background5.jpg"background-size="100%">
-
-		<div class="top"><!--top是页面顶部一栏-->
-			<div align="center"><a href="[[ loginpg ]]"><font face="方正舒体" size="5" color="aliceblue">[[ username ]]</a>
-			</div>
-		</div>
-		<div>
-			<div id="aspace1">
-				<div class="headpic">
-					<img src="img/headpic.jpg">
-				</div>
-				
-				<div class="jieshao">
-					<p><font size="3">十年老店</font></p>
-					<p><font size="3">皇冠品质</font></p>
-				</div>
-			</div>
-
-			<div id="aspace2" class="container" >
-				<!-- <div>{{ totalPrice }}</div> -->
-				<div v-for="(book, index) in books" >
-					<img :src="book.img_url">
-					<span>{{ book.bookname }}</span>
-					<span>{{ book.ISBN }}</span>
-					<span v-if="pageName == 'cart'">{{ book.count }}</span>
-					<span>{{ book.time }}</span>
-					<button @click="addone(index)" v-if="pageName == 'cart'">add one</button>
-					<button @click="subone(index)" v-if="pageName == 'cart'">sub one</button>
-					<button @click="buyThisOne(index)" v-if="pageName == 'cart'">buy now</button>
-					<button @click="del(index)" v-if="pageName == 'cart'">delete</button>
-				</div>
-			</div>
-		</div>	
-			
-			<div class="bottom">	</div>
-
-		<!-- <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script> -->
-		<script src="./js/util.js"></script>
-		<script src="js/vue.js"></script>
-		<script src="js/[[cart_history]].js"></script>
-
-	</body>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <title>旺仔的光影小店 光影 时光</title>
+  <link type="text/css" rel="stylesheet" href="css/style1.css" />
+  <link rel="stylesheet" href="css/shoppingcart.css" />
+</head>
+<body background="img/background5.jpg" background-size="100%">
+  <div class="top">
+	<!--top是页面顶部一栏-->
+	<div align="center">
+	  <a href="[[%20loginpg%20]]"><font face="方正舒体" size="5" color="aliceblue">[[ username ]]</font></a>
+	</div>
+  </div>
+  <div>
+	<font face="方正舒体" size="5" color="aliceblue"></font>
+	<div id="aspace1">
+	  <font face="方正舒体" size="5" color="aliceblue"></font>
+	  <div class="headpic">
+		<font face="方正舒体" size="5" color="aliceblue"><img src="img/headpic.jpg" /></font>
+	  </div><font face="方正舒体" size="5" color="aliceblue"></font>
+	  <div class="jieshao">
+		<font face="方正舒体" size="5" color="aliceblue"></font>
+		<p><font face="方正舒体" size="5" color="aliceblue"><font size="3">十年老店</font></font></p>
+		<p><font face="方正舒体" size="5" color="aliceblue"><font size="3">皇冠品质</font></font></p>
+	  </div>
+	</div>
+	<div id="aspace2" class="container">
+	  <font face="方正舒体" size="5" color="aliceblue"><!-- <div>{{ totalPrice }}</div> --></font>
+	  <div v-for="(book, index) in books">
+		<font face="方正舒体" size="5" color="aliceblue"><img /> <span>{{ book.bookname }}</span> <span>{{ book.ISBN }}</span> <span v-if="pageName == 'cart'">{{ book.count }}</span> <span>{{ book.time }}</span> <button v-if="pageName == 'cart'"><font face="方正舒体" size="5" color="aliceblue">add one</font> <button v-if="pageName == 'cart'">sub one</button> <button v-if="pageName == 'cart'">buy now</button> <button v-if="pageName == 'cart'">delete</button></button></font>
+	  </div>
+	</div>
+  </div>
+  <div class="bottom"></div><!-- <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script> -->
+  <script src="./js/util.js"></script> 
+  <script src="js/vue.js"></script> 
+  <script src="js/[[cart_history]].js"></script>
+</body>
 </html>

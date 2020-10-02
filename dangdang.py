@@ -489,10 +489,10 @@ def thread_func(url, cat, subcat):
 		print(f'getting from cat: {cat}-{subcat}-{link}')
 		books += getbooks(link)
 	df = pd.DataFrame(books)
-	directory = f'/Users/dalek/Documents/working space/shity things/database/ii/csv/{cat}'
+	directory = f'./csv/{cat}'
 	if not os.path.exists(directory):
 		os.makedirs(directory)
-	df.to_csv(f'/Users/dalek/Documents/working space/shity things/database/ii/csv/{cat}/{subcat}.csv', index=False)
+	df.to_csv(f'./csv/{cat}/{subcat}.csv', index=False)
 
 def just10page():
 	# all_books_cats = cats()

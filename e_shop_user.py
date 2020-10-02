@@ -4,12 +4,18 @@ import log
 from mysql.connector.errors import IntegrityError
 from wrapper import MysqlCursorWrapper
 
-dbconfig = {
-	'host': "localhost",
-	'user': "root",
-	'passwd': "734660",
-	'database': "book_e_shop",
-}
+# dbconfig = {
+# 	'host': "localhost",
+# 	'user': "root",
+# 	'passwd': "734660",
+# 	'database': "book_e_shop",
+# }
+
+
+with open("./config.json", "r") as file:
+	dbconfig = json.load(file)["dbconfig"]
+
+
 book_e_shop = mysql.connector.connect(**dbconfig)
 e_shop_cursor = MysqlCursorWrapper(book_e_shop.cursor())
 

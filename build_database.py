@@ -3,11 +3,14 @@ import re
 import mysql.connector
 import log
 import os
+import json
 
-dbconfig = {'host': '127.0.0.1',
-				'user': 'root',
-				'password': '734660',
-				'database': 'book_e_shop'}
+# dbconfig = {'host': '127.0.0.1',
+# 				'user': 'root',
+# 				'password': '734660',
+# 				'database': 'book_e_shop'}
+with open("./config.json", "r") as file:
+	dbconfig = json.load(file)["dbconfig"]
 
 try:
 	conn = mysql.connector.connect(**dbconfig)
