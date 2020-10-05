@@ -27,9 +27,18 @@
 	  </div>
 	</div>
 	<div id="aspace2" class="container">
-	  <font face="方正舒体" size="5" color="aliceblue"><!-- <div>{{ totalPrice }}</div> --></font>
+	  <div>{{ totalPrice }}</div>
 	  <div v-for="(book, index) in books">
-		<font face="方正舒体" size="5" color="aliceblue"><img /> <span>{{ book.bookname }}</span> <span>{{ book.ISBN }}</span> <span v-if="pageName == 'cart'">{{ book.count }}</span> <span>{{ book.time }}</span> <button v-if="pageName == 'cart'"><font face="方正舒体" size="5" color="aliceblue">add one</font> <button v-if="pageName == 'cart'">sub one</button> <button v-if="pageName == 'cart'">buy now</button> <button v-if="pageName == 'cart'">delete</button></button></font>
+	  	<img :src="book.img_url" alt="">
+		<span>{{ book.bookname }}</span> 
+		<span>{{ book.ISBN }}</span>
+		 <!-- <span v-if="pageName == 'cart'">{{ book.count }}</span> -->
+		 <input type="number" :value="book.count" @change="onChange(index, $event)">
+		<span>{{ book.time }}</span>
+		<button v-if="pageName == 'cart'" @click="addone(index)">add one</button>
+		<button v-if="pageName == 'cart'" @click="subone(index)">sub one</button>
+		<button v-if="pageName == 'cart'" @click="buyThisOne(index)">buy now</button>
+		<button v-if="pageName == 'cart'" @click="del(index)">delete</button>
 	  </div>
 	</div>
   </div>

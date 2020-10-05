@@ -95,13 +95,14 @@ var app = new Vue({
 					}
 				}
 				else if (xhttp.status == 500) {
+					changingCartContent = false
 					alert("purchase failed")
 				}
 			}
             xhttp.send()
 		},
 
-		changeCartContent: function (isbn, num, callback) {
+		changeCartContent: function (isbn, num, callback=()=>{}) {
 		    const self = this
 			if (changingCartContent) {
 				alert("您操作的太快了")
@@ -122,6 +123,17 @@ var app = new Vue({
 				changingCartContent = false
 			}
 			xhttp.send()
+		},
+		onChange: function(index, event) {
+			let count = parseInt(event.target.value)
+			if (count < 0) {
+				this.$set(this.books, index, this.books[index])
+				return
+			}
+			var isbn = this.books[index].ISBN
+			this.changeCartContent(isbn, count, ()=>{
+				this.updateAll()
+			})
 		}
 	},
 	created() {
