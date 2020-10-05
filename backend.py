@@ -11,6 +11,7 @@ import qrcode
 import socket
 import string
 import random
+import pandas as pd
 
 
 class frange():
@@ -120,19 +121,54 @@ def get_books(f, count, price_region=None, subcat=None, key_word=None, order=Non
 	return [date_time_toString("publish_time", content) for content in li]
 
 
-def get_personal_recommendation(user_id, f, count):
-	constrain = Constrain()
-	cursor.execute(f"""
-	SELECT *
-	FROM book_info
-	LEFT JOIN
-	(SELECT isbn  FROM customer_{user_id}.browser_history) B
-	ON
-	book_info.isbn=B.isbn
-	GROUP BY book_info.isbn
-	ORDER BY  COUNT(B.isbn) DESC
-	LIMIT {f}, {count}
-	""")
+def get_personal_recommendation(user_id, f, count, price_region=None, subcat=None, key_word=None):
+	# constrain = Constrain()
+	# cursor.execute(f"""
+	# SELECT *
+	# FROM book_info
+	# LEFT JOIN
+	# (SELECT isbn  FROM customer_{user_id}.browser_history) B
+	# ON
+	# book_info.isbn=B.isbn
+	# GROUP BY book_info.isbn
+	# ORDER BY  COUNT(B.isbn) DESC
+	# LIMIT {f}, {count}
+	# """)
+	user = _get_user(user_id)
+	isbn_order_by_view_count = user.get_view_count()
+	books = []
+	d = defaultdict(int)
+	for pack in isbn_order_by_view_count:
+		isbn = pack[0]
+		view_count = pack[1]
+		cursor.execute(f"SELECT sub FROM book_info WHERE ISBN={isbn}")
+		result = cursor.fetchone()
+		d[result[0]] += view_count
+		# books.append(result)
+	max_view_count = max([d[key] for key in d])
+	subs = []
+	for key in d:
+		if d[key] == max_view_count:
+			subs.append(key)
+	log.debug(f"Personal recommendation category: {subs}")
+
+	# li = [{t[i]: c for i, c in enumerate(content)} for content in books]
+	# li = [date_time_toString("publish_time", content) for content in li]
+	# end here get max sub
+	# log.debug(f"{d}")
+	# log.debug(f"{subs}")
+	# log.debug(f"{Constrain().apply_constraint_value('sub', subs)}")
+	constraints = Constrain()
+	constraints.apply_constraint_value('sub', subs).apply_constraint_region("price", price_region).\
+		order_by("sold_count").from_(f).limit(count)
+	cursor.execute(f"SELECT * FROM book_info {constraints}")
+	books = cursor.fetchall()
+	columns = read_columns(cursor, "book_info")
+	li = [{columns[i]: c for i, c in enumerate(content)} for content in books]
+	li = [date_time_toString("publish_time", content) for content in li]
+	return li
+	# dataframe = pd.DataFrame(li)
+	# return dataframe
 
 
 def get_user_cart(user_id):

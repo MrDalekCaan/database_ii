@@ -14,7 +14,8 @@ class TestUser(unittest.TestCase):
 	# 	user.add_shopping_cart('232', '20200202020202')
 
 	def test_recommendation(self):
-		B.get_personal_recommendation("1898048", 's', 's')
+		print(B.get_personal_recommendation("1898048", 's', 's'))
+
 
 if __name__ == "__main__":
 	unittest.main()

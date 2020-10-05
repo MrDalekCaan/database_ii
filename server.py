@@ -11,6 +11,7 @@ from Constants import LIFE_TIME, FAIL, OK
 # from untitled import books
 import backend as B
 import log
+import json
 
 
 class CustomFlask(Flask):
@@ -242,9 +243,20 @@ def get_books():
 	high = null_parameter(request.args.get('high'))
 	key_word = null_parameter(request.args.get('key_word'))
 	order = default(request.args.get('orderby'), "time_desc")
-	bks = B.get_books(f, count, price_region=[low, high], subcat=subcat, key_word=key_word, order=order)
+	if order == "personal_recommendation":
+		user_id = get_user_id()
+		bks = B.get_personal_recommendation(user_id, f, count)
+	else:
+		bks = B.get_books(f, count, price_region=[low, high], subcat=subcat, key_word=key_word, order=order)
 	bks = {"content": bks}
 	return json.dumps(bks)
+
+# @app.route("/personal_recommendation")
+# def personal_recommendation():
+# 	user_id = get_user_id()
+# 	if user_id is None:
+# 		return FAIL
+# 	return json.dumps({"content": B.get_personal_recommendation(user_id)})
 
 
 # @app.route('/book')

@@ -3,6 +3,7 @@ import time
 import log
 from mysql.connector.errors import IntegrityError
 from wrapper import MysqlCursorWrapper
+import json
 
 # dbconfig = {
 # 	'host': "localhost",
@@ -214,6 +215,14 @@ class Customer(EShopUser):
 		except mysql.connector.errors.IntegrityError:
 			log.fatal(f"Book [{isbn}] not exist")
 			return False
+
+	def get_view_count(self):
+		"""
+		Get view count from history
+		:return:list of tuper order by view count
+		"""
+		self.cursor.execute(f"SELECT ISBN, COUNT(ISBN) AS C FROM browser_history GROUP BY ISBN ORDER BY C DESC")
+		return self.cursor.fetchall()
 
 
 class Admin(EShopUser):

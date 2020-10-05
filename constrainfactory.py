@@ -72,7 +72,7 @@ class Constrain:
 		try:
 			self._where_check()
 			if type(values) == list:
-				if len(list) == 0:
+				if len(values) == 0:
 					return self
 				cons = ""
 				for value in values:

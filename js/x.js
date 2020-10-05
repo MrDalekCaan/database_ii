@@ -73,6 +73,7 @@ var app = new Vue({
 		},
 		chosecat: function(e) {
 		    // set current subcat
+			this.all_now = false
 			let target = e.target;
 			if (target.tagName == 'SPAN') {
 				target = target.parentNode
