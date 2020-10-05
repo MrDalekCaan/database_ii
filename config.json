@@ -1,0 +1,8 @@
+{
+	"dbconfig":{
+		"host": "localhost",
+		"user": "root",
+		"password":"734660000gG",
+		"database": "book_e_shop"
+	}
+}
