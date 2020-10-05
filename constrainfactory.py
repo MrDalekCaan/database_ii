@@ -62,7 +62,7 @@ class Constrain:
 		finally:
 			return self
 
-	def apply_constraint_value(self, property_name: [str], values=None):
+	def apply_constraint_value(self, property_names: [str], values=None):
 		"""
 		:param property_name:str of property_name(column name)
 		:param values:
@@ -77,16 +77,20 @@ class Constrain:
 			# 		return self
 			if not isinstance(values, Iterable) or type(values) == str:
 				values = [values]
-			cons = ""
-			for value in values:
-				if type(value) == int or type(value) == float:
-					cons += f" {property_name}={value} OR"
-				else:
-					cons += f" {property_name}='{value}' OR"
-				# cons = f" {property_name}={value} OR"
-			cons = re.sub(r"^ *OR *", "", cons)
-			cons = re.sub(r" *OR *$", "", cons)
-			self.constraints += f" AND {cons} "
+			if not isinstance(property_names, Iterable) or type(property_names) == str:
+				property_names = [property_names]
+			for property_name in property_names:
+				cons = ""
+				for value in values:
+					if type(value) == int or type(value) == float:
+						cons += f" {property_name}={value} OR"
+					else:
+						cons += f" {property_name}='{value}' OR"
+					# cons = f" {property_name}={value} OR"
+				cons = re.sub(r"^ *OR *", "", cons)
+				cons = re.sub(r" *OR *$", "", cons)
+				self.constraints += f" AND {cons} "
+
 			# if self._where:
 			# 	log.debug("where add apply_constraint_value")
 			# else:
@@ -101,13 +105,20 @@ class Constrain:
 		finally:
 			return self
 
-	def like(self, property_name: str, pattern=None):
+	def like(self, property_names: [str], pattern=None):
 		if pattern is None:
 			return self
+		if not isinstance(property_names, Iterable) or type(property_names) == str:
+			property_names = [property_names]
 		self._where_check()
 		if self._where:
 			log.debug("where add like")
-		self.constraints += f" AND {property_name} LIKE '{pattern}'"
+		cons = ""
+		for property_name in property_names:
+			cons += f" {property_name} LIKE '{pattern}' OR "
+		cons = re.sub(r"^ *OR *", "", cons)
+		cons = re.sub(r" *OR *$", "", cons)
+		self.constraints += f" AND {cons} "
 		return self
 
 	def _check_integer(self, integer):
