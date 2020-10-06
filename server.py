@@ -33,6 +33,7 @@ book_info_page_path = './book_info.html'
 register_page_path = './register.html'
 mobile_login_page_path = "./m.html"
 search_result_page_path = "./search_result.html"
+sold_history_page_path = "./sold_history.html"
 
 
 def readfile(filename):
@@ -277,6 +278,17 @@ def get_books():
 def padzero(t):
 	t = str(t)
 	return t if len(t) == 2 else f'0{t}'
+
+@app.route("/sold_history")
+def sold_history():
+	return readfile(sold_history_page_path)
+
+@app.route("/get_history")
+def get_history():
+	f = int(request.args.get('from'))
+	count = int(request.args.get('count'))
+	bks = B.get_history(f, count)
+	return json.dumps({"content": bks})
 
 
 @app.route("/book_info")

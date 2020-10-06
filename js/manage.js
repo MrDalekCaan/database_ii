@@ -5,7 +5,7 @@ var app = new Vue({
 		selected: [0, 0],
 		 titles:[],
 		 // pagesize: 21,
-        pageSize: 20,
+        pageSize: 2,
 		pagecount:1,
 		editable_columns: null,
 		all_now: false
@@ -189,6 +189,9 @@ var app = new Vue({
 									editable_columns.splice(i, 1)
 								}
 								if (editable_columns[i] == "sold_count") {
+									editable_columns.splice(i, 1)
+								}
+								if (editable_columns[i] == "img_url") {
 									editable_columns.splice(i, 1)
 								}
 							}	

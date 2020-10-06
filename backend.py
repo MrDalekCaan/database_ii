@@ -121,6 +121,16 @@ def get_books(f, count, price_region=None, subcat=None, key_word=None, order=Non
 	return [date_time_toString("publish_time", content) for content in li]
 
 
+def get_history(f, count):
+	constrain = Constrain()
+	constrain.from_(f).limit(count)
+	cursor.execute(f"SELECT * FROM shopping_history {constrain}")
+	contents = cursor.fetchall()
+	t = read_columns(cursor, "shopping_history")
+	li = [{t[i]: c for i, c in enumerate(content)} for content in contents]
+	return [date_time_toString("time", content) for content in li]
+
+
 def get_personal_recommendation(user_id, f, count, price_region=None, subcat=None, key_word=None):
 	# constrain = Constrain()
 	# cursor.execute(f"""

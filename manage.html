@@ -13,6 +13,7 @@
 			<div class="top"><!--top是页面顶部一栏-->
 			<div align="center"><a href="[[ loginpg ]]"><font face="方正舒体" size="5" color="aliceblue">[[ username ]]</a></div>
 			<a href="#" style="display: [[ display ]]" onclick="quit(); return false;">退出登陆</a>
+			<a href="sold_history">销售记录</a>
 			</div>
 
 			<div id="app">
@@ -68,10 +69,29 @@
 								<th width="21%">price</th>
 								<th width="21%">image url</th> -->
 								<th>isbn</th>
-								<th v-for="editable in editable_columns">{{editable}}</th>
+								<!-- <th v-for="editable in editable_columns">{{editable}}</th> -->
+								<th>图片</th>
+								<th>店铺编号</th>
+								<th>店铺名称</th>
+								<th>开本</th>
+								<th>纸张类型</th>
+								<th>包装</th>
+								<th>是否套装</th>
+								<th>书名</th>
+								<th>发布时间</th>
+								<th>作者</th>
+								<th>价格</th>
+								<th>重量</th>
+								<th>页数</th>
+								<th>贞装</th>
+								<th>出版社</th>
+								<th>种类</th>
+								<th>次级种类</th>
+								<th>库存</th>
 							</tr>
 							<tr v-for="(book, i) in books" :id="book.id" :index="i">
 								<td><span>{{book.ISBN}}</span></td>
+								<td><img :src="book.img_url"></td>
 								<!-- <td><input :value="book.book_name"></input></td>
 								<td><input :value="book.author"></input></td>
 								<td><input :value="book.price"></input></td>
@@ -90,7 +110,8 @@
 				<div class="bottom"><!--页面底部-->
 					<p align="center">
 						<button @click="lastpage">上一页</button>
-						<span>{{ pagecount }}</span>
+						<!-- <span>{{ pagecount }}</span> -->
+						<input type="number" v-model="pagecount">
 						<button @click="nextpage">下一页</button>
 					</p>
 				</div>
