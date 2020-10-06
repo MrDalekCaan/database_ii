@@ -10,7 +10,7 @@ var app = new Vue({
 			let price = 0
 			
 		}
-	}
+	},
 	methods: {
 		curTitle: function() {
 			return this.titles[this.selected[0]].titles[this.selected[1]];
