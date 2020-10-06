@@ -23,6 +23,8 @@ class frange():
 		return self.left <= value <= self.right
 
 
+
+
 cursor = eu.e_shop_cursor
 
 user_cache = Cache(CACHE_TIME)
@@ -145,6 +147,8 @@ def get_personal_recommendation(user_id, f, count, price_region=None, subcat=Non
 	# LIMIT {f}, {count}
 	# """)
 	user = _get_user(user_id)
+	if user.type == "0000":
+		return False
 	isbn_order_by_view_count = user.get_view_count()
 	books = []
 	d = defaultdict(int)
@@ -186,6 +190,8 @@ def get_user_cart(user_id):
     return [] if failed
     """
 	user = _get_user(user_id)
+	if user.type == "0000":
+		return False
 	contents = user.get_shopping_cart()
 	t = read_columns(user.cursor, "shopping_cart")
 	li = [{t[i]: c for i, c in enumerate(content)} for content in contents]
@@ -203,6 +209,8 @@ def update_user_cart(user_id, operation, isbn, count=None):
 	now = '{0:%Y%m%d%H%M%S}'.format(datetime.datetime.now())
 	# user: eu.Customer = user_cache[user_id]
 	user: eu.Customer = _get_user(user_id)
+	if user.type == "0000":
+		return False
 	if operation == 0:
 		if user.add_shopping_cart(isbn, now):
 			log.info(f"user {user_id} add book {isbn} to shopping cart")
@@ -227,6 +235,8 @@ def add_history_record(user_id, isbn, visit_time) -> bool:
 	"""
 	try:
 		user: eu.Customer = user_cache[user_id]
+		if user.type == "0000":
+			return False
 	except KeyError:
 		log.debug(f"Cannot find user: {user_id}")
 		return False
