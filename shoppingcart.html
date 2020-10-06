@@ -27,7 +27,7 @@
 	  </div>
 	</div>
 	<div id="aspace2" class="container">
-	  <div>{{ totalPrice }}</div>
+	  <div v-if="pageName == 'cart'" style="color: red">{{ totalPrice }}</div>
 	  <div v-for="(book, index) in books">
 	  	<img :src="book.img_url" alt="">
 		<span>{{ book.bookname }}</span> 

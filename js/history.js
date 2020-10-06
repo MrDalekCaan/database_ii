@@ -5,6 +5,12 @@ var app = new Vue({
 		books: [],
 		pageName: "history"
 	},
+	computed: {
+		totalPrice: function() {
+			let price = 0
+			
+		}
+	}
 	methods: {
 		curTitle: function() {
 			return this.titles[this.selected[0]].titles[this.selected[1]];

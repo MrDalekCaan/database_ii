@@ -197,9 +197,9 @@ var app = new Vue({
 					}
 					self.titles = result
 					// books
-                   	const ele = document.getElementById('aspace2');
-					if (ele == null)
-						return;
+     //               	const ele = document.getElementById('aspace2');
+					// if (ele == null)
+					// 	return;
 					self.get_books_by(0, self.pageSize, books => {
 						self.books.push(...books)
 					})

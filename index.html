@@ -1,54 +1,57 @@
 <!DOCTYPE html>
-<html xmlns:v-on="http://www.w3.org/1999/xhtml" xmlns:v-bind="http://www.w3.org/1999/xhtml">
+<html>
 	<head>
-		<meta charset="utf-8">
-		<title>旺仔的光影小店 光影 时光</title>
-		<link type="text/css" rel="stylesheet" href="css/style1.css">
-		<script src="./js/util.js"></script>
+		<meta charset="utf-8" />
+		<title>手机页面</title>
+		<link type="text/css" rel="stylesheet" href="css/style_wzy.css">
 	</head>
-	<body background="img/background5.jpg"background-size="100%">
-    <div id="app">
-		<div class="top"><!--top是页面顶部一栏-->
+	<body>
+		<div id="app">
+		<img src="img/head.jpg" style="width: 5rem;height: 5rem;" class="touxiang">
+		<div class="top1">
 			<div align="center">
-				<a href="[[ loginpg ]]"><font face="方正舒体" size="5" color="aliceblue">[[ username ]]</a>
+				<a href="[[ loginpg ]]"><font face="方正舒体" size="6" color="aliceblue">[[ username ]]</a>
 				<a href="[[ cart_link ]]" style="display: [[ display ]]">[[ cart ]]</a>
 				<a href="[[ history_link ]]" style="display: [[ display ]]">[[ history ]]</a>
 				<a href="#" style="display: [[ display ]]" onclick="quit(); return false;">退出登陆</a>
+				<br>
+				<a href = "www.baidu.com"><button type="button" class = "button01">一键登录</button></a>
+				<a href = "www.baidu.com"><button type="button" class = "button02">快速注册</button></a>
 			</div>
 		</div>
-
-		<form action="search_result" @submit.prevent="onsubmit">
-			<span>搜索</span><input v-on:keyup.enter="fuzzy_search_on" v-model="key_word" type="text" id="search_book_name"/>
+		
+		<div class="mspace1">
+			<span>查找图书</span><input v-on:keyup.enter="fuzzy_search_on" v-model="key_word" type="text" id="search_book_name"/>
 			<button @click="fuzzy_search_on">start</button>
 			<button @click="fuzzy_search_off">off</button>
-		</form>
-
-		<ul id="order_by" @click="set_order">
-			<li><div id="time_asc">时间升序</div></li>
-			<li><div id="time_desc">时间降序</div></li>
-			<li><div id="sold_asc">销量升序</div></li>
-			<li><div id="sold_desc">销量降序</div></li>
-			<li><div id="personal_recommendation">个人推荐</div></li>
-		</ul>
-
-		<div id="aspace1">
-				 <div class="filterComponent">
+			
+			<div class="filterComponent">
 				 <p style="font-size: 13px;">筛选</p>
 				 <input type="number" placeholder="最低价" v-model="low" id="low" @change="boundChange" @keyup.enter="startFilter();updatePage()">
 				 <input type="number" placeholder="最高价" v-model="high" id="high" @change="boundChange" @keyup.enter="startFilter();updatePage()">
 				 <button @click="startFilter">确定</button>
 				 <button @click="cancleFilter">取消</button>
-				 </div>
-					 <div class="headpic">
-					 <img src="img/headpic.jpg">
-				 </div>
+			</div>
+			
+			<ul id="order_by" @click="set_order">
+				<p>排序选择</p>
+				<li><div id="time_asc">时间升序</div></li>
+				<li><div id="time_desc">时间降序</div></li>
+				<li><div id="sold_asc">销量升序</div></li>
+				<li><div id="sold_desc">销量降序</div></li>
+				<li><div id="personal_recommendation">个人推荐</div></li>
+			</ul>
+			
+			 <div class="headpic">
+				 <img src="img/headpic.jpg">
+			</div>
 
-				 <div class="jieshao">
-					 <p><font size="3">十年老店</font></p>
-					 <p><font size="3">皇冠品质</font></p>
-				 </div>
-
-					 <div class="daogou" id="daogou1">
+			<div class="jieshao">
+				 <p style="margin-top: -1rem;"><font size="3">十年老店</font></p>
+				 <p style="margin-top: -3rem;"><font size="3">皇冠品质</font></p>
+			</div>
+			
+			<div class="daogou" id="daogou1">
 					 <ul class="daogoulist">
 					 <li :class="{ selectedcat: all_now }" @click="all">所有</li>
 
@@ -68,46 +71,18 @@
 
 					 </ul>
 					 </div>
-					 </div>
+		</div>
 		
-			<div id="aspace2" v-on:scroll="scroll">
-				<a v-for="(book, v) in books" :id="'book-' + v " :key="book.id" :href="'/book_info?isbn=' + book.ISBN">
+		<div class="mspace2">
+			<a v-for="(book, v) in books" :id="'book-' + v " :key="book.id" :href="'/book_info?isbn=' + book.ISBN">
 					<p>book name: {{ book.book_name }}</p>
 					<p>book price: {{ book.price }}</p>
 					<img v-bind:src="book.img_url">
 				</a>
-			</div>
-
-
-		<div class="bottom"><!--页面底部-->
-			<p align="center"></p>
 		</div>
-
-		<!-- <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script> -->
-</div>
+		</div>
 		<script src="js/vue.js"></script>
 		<script src="js/x.js"></script>
+		<script src="js/util.js"></script>
 	</body>
 </html>
-
-<!-- SELECT A.*
-FROM book_e_shop.book_info A
-LEFT JOIN
-(SELECT isbn FROM browser_history) B
-ON
-A.isbn=B.isbn
- --><!--WHERE A.price < 30-->
-<!-- GROUP BY A.isbn
-ORDER BY  COUNT(B.isbn) DESC
-
-SELECT *
-FROM book_info
-LEFT JOIN
-(SELECT isbn  FROM customer_1898048.browser_history) B
-ON
-book_info.isbn=B.isbn
-GROUP BY book_info.isbn
-ORDER BY  COUNT(B.isbn) DESC
- --><!--WHERE A.price < 30-->
-
-
