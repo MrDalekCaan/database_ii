@@ -63,7 +63,7 @@ def create_table(table_name, definition):
 
 
 def build_data(cat, csv_filename) -> str:
-	subcat = csv_filename.split('/')[-1]
+	subcat = csv_filename.split('/\\')[-1]
 	subcat = subcat.split('.')[0]
 	df = pd.read_csv(csv_filename)
 	df.fillna('', inplace=True)
@@ -93,7 +93,7 @@ def build_data(cat, csv_filename) -> str:
 		data += row
 	data = data.strip(' ,')
 	column_name = ""
-	for column in df._columns:
+	for column in df.columns:
 		column_name += f"{column},"
 	column_name += f"cat, sub"
 	column_name = f"({column_name.strip(' ,')})"
