@@ -33,7 +33,7 @@
 		<span>{{ book.bookname }}</span> 
 		<span>{{ book.ISBN }}</span>
 		 <!-- <span v-if="pageName == 'cart'">{{ book.count }}</span> -->
-		 <input type="number" :value="book.count" @change="onChange(index, $event)">
+		 <input v-if="pageName == 'cart'" type="number" :value="book.count" @change="onChange(index, $event)">
 		<span>{{ book.time }}</span>
 		<button v-if="pageName == 'cart'" @click="addone(index)">add one</button>
 		<button v-if="pageName == 'cart'" @click="subone(index)">sub one</button>

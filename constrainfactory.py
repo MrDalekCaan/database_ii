@@ -108,6 +108,7 @@ class Constrain:
 	def like(self, property_names: [str], pattern=None):
 		if pattern is None:
 			return self
+		pattern = f"%pattern%"
 		if not isinstance(property_names, Iterable) or type(property_names) == str:
 			property_names = [property_names]
 		self._where_check()
