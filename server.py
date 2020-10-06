@@ -32,6 +32,7 @@ shoppingcartpg = './shoppingcart.html'
 book_info_page_path = './book_info.html'
 register_page_path = './register.html'
 mobile_login_page_path = "./m.html"
+search_result_page_path = "./search_result.html"
 
 
 def readfile(filename):
@@ -230,6 +231,11 @@ def mobile_login_page():
 @app.route("/cats")
 def get_cats():
 	return json.dumps(B._get_cats())
+
+
+@app.route("/search_result")
+def search_result():
+	return readfile(search_result_page_path)
 
 
 @app.route('/books')

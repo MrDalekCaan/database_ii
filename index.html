@@ -17,9 +17,11 @@
 			</div>
 		</div>
 
-		<span>search book name</span><input v-on:keyup.enter="fuzzy_search_on" v-model="key_word" type="text" id="search_book_name"/>
-		<button @click="fuzzy_search_on">start</button>
-		<button @click="fuzzy_search_off">off</button>
+		<form action="search_result" @submit.prevent="onsubmit">
+			<span>search book name</span><input v-on:keyup.enter="fuzzy_search_on" v-model="key_word" type="text" id="search_book_name"/>
+			<button @click="fuzzy_search_on">start</button>
+			<button @click="fuzzy_search_off">off</button>
+		</form>
 
 		<ul id="order_by" @click="set_order">
 			<li><div id="time_asc">时间升序</div></li>

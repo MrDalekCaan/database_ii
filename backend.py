@@ -112,7 +112,7 @@ def get_books(f, count, price_region=None, subcat=None, key_word=None, order=Non
 	constrain = Constrain()
 	log.debug(f"get_books-price_region:{price_region}")
 	constrain.apply_constraint_value("sub", subcat).apply_constraint_region("price", price_region). \
-		like(["book_name", "cat", "sub", "author", "ISBN"], key_word).order_by(order_property, order_way).from_(f).limit(count)
+		like(["book_name", "cat", "sub", "author", "ISBN"], f"%{key_word}%").order_by(order_property, order_way).from_(f).limit(count)
 	log.debug(constrain)
 	cursor.execute(f"SELECT * FROM book_info {constrain}")
 	contents = cursor.fetchall()

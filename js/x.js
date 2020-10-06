@@ -19,6 +19,9 @@ var app = new Vue({
 		}
 	},
 	methods: {
+		onsubmit: function() {
+			window.location.href = `search_result?key_word=${this.key_word}`
+		},
 		fuzzy_search_on: function() {
 			this.fuzzy_mode = true
             // this.books = this.get_books_by(0, this.pageSize)
