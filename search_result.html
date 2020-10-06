@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title></title>
+	<style>
+		.order_active{
+			background: yellow;
+		}
+	</style>
+</head>
+<body>
+	<div id="root">
+		<ul id="order_by" @click="set_order">
+			<li><div id="time_asc" :class="{order_active: order == 0}" index='0'>时间升序</div></li>
+			<li><div id="time_desc" :class="{order_active: order == 1}" index='1'>时间降序</div></li>
+			<li><div id="sold_asc" :class="{order_active: order == 2}" index='2'>销量升序</div></li>
+			<li><div id="sold_desc" :class="{order_active: order == 3}" index='3'>销量降序</div></li>
+		</ul>
+
+		<ul>
+			<li v-for="(book, index) in books">
+				<a :href="'/book_info?isbn=' + book.ISBN">
+					<img :src="book.img_url" alt="">
+					<p>书名：{{book.book_name}}</p>
+					<p>作者：{{book.author}}</p>
+					<p>销售量：{{book.sold_count}}</p>
+					<p>价格：{{book.price}}元</p>
+				</a>
+			</li>
+		</ul>
+		<form action="search_result" @submit.prevent="onSubmit">
+			<button @click="previousPage">previous page</button>
+			<input type="number" v-model="pageCount" name="pageCount">
+			<button @click="nextPage()">next page</button>
+		</form>
+	</div>
+
+	<script src="./js/vue.js"></script>
+	<script src="./js/search_result.js"></script>
+</body>
+</html>

@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title></title>
+</head>
+<body>
+	<div id="root">
+		<ul>
+			<li v-for="(book, index) in books" :key="book.ISBN">
+				<a :href="'/book_info?isbn=' + book.ISBN">
+					<img :src="book.img_url" alt="">
+					<!-- <p>书名：{{book.book_name}}</p> -->
+					<p>isbn: {{book.ISBN}}</p>
+					<!-- <p>作者：{{book.author}}</p> -->
+					<p>销售量：{{book.count}}</p>
+					<p>时间：{{book.time}}</p>
+					<!-- <p>价格：{{book.price}}元</p> -->
+				</a>
+			</li>
+		</ul>
+
+		<form action="search_result" @submit.prevent="onSubmit">
+			<button @click="previousPage">previous page</button>
+			<input type="number" v-model="pageCount" name="pageCount">
+			<button @click="nextPage">next page</button>
+		</form>
+
+	</div>
+
+	<script src="./js/vue.js"></script>
+	<script src="./js/sold_history.js"></script>
+</body>
+</html>
