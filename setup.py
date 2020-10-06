@@ -7,7 +7,7 @@ main()
 user_id = eu.register("flor", "123456")
 eu.e_shop_cursor.execute(f"INSERT INTO user(user_name, user_id, password, type) VALUES('admin', '000000', '000000', '0000')")
 with open("defaultuser.json", 'w') as file:
-	json.dump(file, {"customer": {
+	json.dump({"customer": {
 			"username": "flor",
 			"password": "123456",
 			"userid": user_id
@@ -17,5 +17,5 @@ with open("defaultuser.json", 'w') as file:
 			"password": "000000",
 			"userid": "000000"
 		}
-	})
+	},file)
 

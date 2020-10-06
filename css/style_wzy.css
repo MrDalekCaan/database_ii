@@ -1,0 +1,59 @@
+.top1{
+	width: 100%;
+	height: 10rem;
+	background-color: black;
+	opacity: 0.7;
+}
+
+.button01{
+	width: 8rem;
+    height: 2rem;
+	margin-top: 2.5rem;
+	margin-left: -23rem;
+}
+
+.button02{
+	width: 8rem;
+    height: 2rem;
+	
+}
+
+.mspace1{
+	width: 20%;
+	height: 100rem;
+	background-color: #000000;
+	margin-top: 3rem;
+}
+
+.mspace2{
+	width: 75%;
+	height: 100rem;
+	background-color: black;
+	float: right;
+	margin-top: -100rem;
+}
+
+.filterComponent{
+	margin-top: 3rem;
+}
+
+.touxiang{
+	position: absolute;
+    z-index: 9;
+    margin-top: 1.5rem;
+    margin-left: 2.5rem;
+}
+
+.mspace3{
+	width: 45rem;
+	height: 52rem;
+	background-color: #000000;
+	opacity: 0.7;
+	margin-left: 8rem;
+    margin-top: 24rem;
+}
+
+.pic1{
+	margin-left: 12.5rem;
+	margin-top: 2rem;
+}
